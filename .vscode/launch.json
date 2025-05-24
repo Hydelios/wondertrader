@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug WtRunner",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/root/trading_sys/wondertrader/src/build_debug/build_x64/Debug/bin/WtRunner/WtRunner",
+      "args": [
+        "-c", "config.yaml",
+        "-l", "logcfg.yaml"
+      ],
+      "stopAtEntry": false,
+      "cwd": "/root/trading_sys/wondertrader/src/build_debug/build_x64/Debug/bin/WtRunner",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    }
+  ]
+}

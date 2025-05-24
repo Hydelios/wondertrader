@@ -37,14 +37,17 @@ ELSE (GNUCC)
 
 		MESSAGE(STATUS "MyDepends is at $ENV{MyDependsGcc}")
 	ELSE(UNIX)
-		SET (MyDeps "/home/mydeps")
+		SET (MyDeps "/root/trading_sys/wondertrader/3rd/mydeps_gcc8.4.0/mydeps")
 		SET(SUFFIX .so)
 
-		MESSAGE(STATUS "MyDepends is at /home/mydeps")
+		MESSAGE(STATUS "MyDepends is at /root/trading_sys/wondertrader/3rd/mydeps_gcc8.4.0/mydeps")
 	ENDIF()
 
 	SET(INCS ${MyDeps}/include)
 	SET(LNKS ${MyDeps}/lib)
+	
+	# ✅ 添加这一句，确保头文件路径正确传给编译器
+	include_directories(${INCS})
 
 	MESSAGE(STATUS "Platform is x64")
 	SET(PLATFORM x64)
