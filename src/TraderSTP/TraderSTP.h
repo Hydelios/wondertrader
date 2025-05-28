@@ -2,16 +2,16 @@
  * \file TraderSTP.h
  * \project	WonderTrader
  *
- * \author YourName
- * \date 2025/05/27
- *
- * \brief STP交易接口头文件，实现ITraderApi标准接口
+ * \author Wesley
+ * \date 2024/03/21
+ * 
+ * \brief 
  */
 #pragma once
 
 #include <string>
 #include <queue>
-#include <atomic>
+#include <stdint.h>
 
 #include "../Includes/WTSTypes.h"
 #include "../Includes/ITraderApi.h"
@@ -34,20 +34,18 @@ public:
 public:
 	typedef enum
 	{
-		WS_NOTLOGIN,
-		WS_LOGINING,
-		WS_LOGINED,
-		WS_LOGINFAILED,
-		WS_CONFIRMED,
-		WS_ALLREADY
+		WS_NOTLOGIN,		//未登录
+		WS_LOGINING,		//正在登录
+		WS_LOGINED,			//已登录
+		WS_LOGINFAILED,		//登录失败
+		WS_ALLREADY			//全部就绪
 	} WrapperState;
 
 private:
-	int authenticate();
 	int doLogin();
 
 	//////////////////////////////////////////////////////////////////////////
-	// ITraderApi 接口实现
+	//ITraderApi接口
 public:
 	virtual bool init(WTSVariant* params) override;
 
@@ -67,7 +65,7 @@ public:
 
 	virtual int logout() override;
 
-	virtual int orderInsert(WTSEntrust* entrust) override;
+	virtual int orderInsert(WTSEntrust* eutrust) override;
 
 	virtual int orderAction(WTSEntrustAction* action) override;
 
@@ -79,63 +77,116 @@ public:
 
 	virtual int queryTrades() override;
 
+	virtual int querySettlement(uint32_t uDate) override;
+
 	//////////////////////////////////////////////////////////////////////////
-	// STP 协议事件回调接口（按你的 STP SDK 替换或填充）
+	//StpTradeSpi接口
 public:
-	void onSTPConnected();
-	void onSTPDisconnected(int reason);
-	void onLoginResponse(bool success, const std::string& msg);
-	void onLogoutResponse(bool success, const std::string& msg);
+	virtual void OnFrontDisconnected(int nReason) override;
 
-	void onAccountInfo(const WTSVariant* account);
-	void onPositionInfo(const WTSVariant* position);
-	void onOrderInfo(const WTSVariant* order);
-	void onTradeInfo(const WTSVariant* trade);
+	virtual void OnRspOperatorLogin(StpRspLoginField* pRspLogin, int count, StpAccountInfoField* pAccountInfo, StpRspInfoField* pRspInfo, int64_t nClientRequestId) override;
 
-	void onOrderAccepted(const std::string& localid);
-	void onOrderRejected(const std::string& localid, const std::string& reason);
-	void onOrderCanceled(const std::string& localid);
-	void onTradeExecuted(const std::string& localid, const WTSVariant* trade);
+	virtual void OnRspLogout(StpRspInfoField* pRspInfo) override;
+
+	virtual void OnRspError(StpRspInfoField* pRspInfo) override;
+
+	virtual void OnRtnOrder(StpOrderField* pOrder) override;
+
+	virtual void OnRtnTrade(StpTradeField* pTrade) override;
+
+	virtual void OnRspErrInsertOrder(StpOrderInsertReqField* pInputOrder, StpRspInfoField* pRspInfo, int64_t nClientRequestId) override;
+
+	virtual void OnRspErrCancelOrder(StpOrderCancelReqField* pOrderAction, StpRspInfoField* pRspInfo, int64_t nClientRequestId) override;
+
+	virtual void OnQryAccountAsset(StpUserAccountAssetField* pAccount, int count, StpRspInfoField* pRspInfo, int64_t nClientRequestId) override;
+
+	virtual void OnQryPosition(StpUserComboPositionField* pPosition, int count, StpRspInfoField* pRspInfo, int64_t nClientRequestId) override;
+
+	virtual void OnQryPositionDetail(StpPositionDetailField* pPosition, int count, StpRspInfoField* pRspInfo, int64_t nClientRequestId) override;
+
+	virtual void OnQryOrder(StpOrderField* pOrder, int count, StpRspInfoField* pRspInfo, int64_t nClientRequestId) override;
+
+	virtual void OnQryTrade(StpTradeField* pTrade, int count, StpRspInfoField* pRspInfo, int64_t nClientRequestId) override;
+
+private:
+	/*
+	*	检查错误信息
+	*/
+	bool IsErrorRspInfo(StpRspInfoField *pRspInfo);
+
+	int wrapPriceType(WTSPriceType priceType);
+	int wrapDirectionType(WTSDirectionType dirType, WTSOffsetType offType);
+	int wrapOffsetType(WTSOffsetType offType);
+	int	wrapTimeCondition(WTSTimeCondition timeCond);
+	int wrapActionFlag(WTSActionFlag actionFlag);
+
+	WTSPriceType		wrapPriceType(char priceType);
+	WTSDirectionType	wrapDirectionType(char dirType, char offType);
+	WTSDirectionType	wrapPosDirection(char dirType);
+	WTSOffsetType		wrapOffsetType(char offType);
+	WTSTimeCondition	wrapTimeCondition(char timeCond);
+	WTSOrderState		wrapOrderState(char orderState);
+
+	WTSOrderInfo*	makeOrderInfo(StpOrderField* orderField);
+	WTSEntrust*		makeEntrust(StpOrderInsertReqField *entrustField);
+	WTSEntrustAction*	makeAction(StpOrderCancelReqField *entrustField);
+	WTSError*		makeError(StpRspInfoField* rspInfo, WTSErroCode ec = WEC_NONE);
+	WTSTradeInfo*	makeTradeInfo(StpTradeField *tradeField);
+
+	void			generateEntrustID(char* buffer, uint32_t orderRef);
+	bool			extractEntrustID(const char* entrustid, uint32_t &orderRef);
+
+	uint32_t		genRequestID();
 
 protected:
-	// 私有工具函数
-	uint32_t genRequestID();
-	void generateEntrustID(char* buffer, uint32_t uniqueID);
-	bool extractEntrustID(const char* entrustid, uint32_t &uniqueID);
+	std::string		m_strBroker;
+	std::vector<std::string> m_strFront;
 
-	WTSError* makeError(const std::string& msg);
-	WTSOrderInfo* makeOrderInfoFromSTP(const WTSVariant* raw);
-	WTSTradeInfo* makeTradeInfoFromSTP(const WTSVariant* raw);
-
-protected:
-	std::string		m_strServer;
 	std::string		m_strUser;
 	std::string		m_strPass;
-	std::string		m_strProductInfo;
+
+	std::string		m_strProdInfo;
+
 	std::string		m_strTag;
 
+	std::string		m_strUserName;
+	std::string		m_strFlowDir;
+
 	ITraderSpi*		m_sink;
+	uint64_t		m_uLastQryTime;
 
-	WrapperState	m_wrapperState;
-	std::atomic<uint32_t> m_requestID;
-	std::atomic<uint32_t> m_localOrderID;
+	uint32_t					m_lDate;
+	std::atomic<uint32_t>		m_orderRef;		//报单引用
 
-	bool			m_bConnected;
-	bool			m_bLoggedIn;
+	WrapperState				m_wrapperState;
 
-	typedef std::queue<CommonExecuter> QueryQueue;
-	QueryQueue		m_queQuery;
-	bool			m_bInQuery;
-	StdUniqueMutex	m_mtxQuery;
-	uint64_t		m_lastQryTime;
+	StpTradeApi*				m_pUserAPI;
+	std::atomic<uint32_t>		m_iRequestID;
 
-	bool			m_bStopped;
-	StdThreadPtr	m_thrdWorker;
+	typedef WTSHashMap<std::string> PositionMap;
+	PositionMap*				m_mapPosition;
+	WTSArray*					m_ayTrades;
+	WTSArray*					m_ayOrders;
+	WTSArray*					m_ayPosDetail;
+
+	IBaseDataMgr*				m_bdMgr;
+
+	typedef std::queue<CommonExecuter>	QueryQue;
+	QueryQue				m_queQuery;
+	bool					m_bInQuery;
+	StdUniqueMutex			m_mtxQuery;
+	uint64_t				m_lastQryTime;
+
+	bool					m_bStopped;
+	StdThreadPtr			m_thrdWorker;
 
 	std::string		m_strModule;
 	DllHandle		m_hInstSTP;
+	typedef StpTradeApi* (*STPCreator)(const char *);
+	STPCreator		m_funcCreator;
 
-	// 标记缓存器
+	//委托单标记缓存器
 	WtKVCache		m_eidCache;
+	//订单标记缓存器
 	WtKVCache		m_oidCache;
 };
