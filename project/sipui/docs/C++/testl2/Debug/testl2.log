@@ -1,0 +1,11 @@
+﻿  stdafx.cpp
+  testl2.cpp
+  work.cpp
+d:\project\api_demo\c++\testl2\work.cpp(99): warning C4473: “printf”: 没有为格式字符串传递足够的参数
+  d:\project\api_demo\c++\testl2\work.cpp(99): note: 占位符和其参数预计 7 可变参数，但提供的却是 6 参数
+  d:\project\api_demo\c++\testl2\work.cpp(99): note: 缺失的可变参数 7 为格式字符串“%d”所需
+d:\project\api_demo\c++\testl2\work.cpp(153): warning C4473: “printf”: 没有为格式字符串传递足够的参数
+  d:\project\api_demo\c++\testl2\work.cpp(153): note: 占位符和其参数预计 5 可变参数，但提供的却是 4 参数
+  d:\project\api_demo\c++\testl2\work.cpp(153): note: 缺失的可变参数 5 为格式字符串“%d”所需
+  正在生成代码...
+  testl2.vcxproj -> D:\project\api_demo\C++\Debug\testl2.exe
