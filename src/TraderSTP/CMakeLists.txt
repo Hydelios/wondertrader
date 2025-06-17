@@ -17,7 +17,8 @@ LINK_DIRECTORIES(${LNKS})
 ADD_LIBRARY(TraderSTP SHARED ${SRC})
 
 IF(MSVC)
-ELSE(GNUCC)
+    # Windows specific settings
+ELSE()
     SET(LIBS
         pthread
         boost_filesystem
@@ -27,10 +28,11 @@ ELSE(GNUCC)
 ENDIF()
 
 IF (MSVC)
-ELSE (GNUCC)
+    # Windows specific properties
+ELSE()
     SET_TARGET_PROPERTIES(TraderSTP PROPERTIES
         CXX_VISIBILITY_PRESET hidden
         C_VISIBILITY_PRESET hidden
         VISIBILITY_INLINES_HIDDEN 1
         LINK_FLAGS_RELEASE -s)
-ENDIF ()
+ENDIF()

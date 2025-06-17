@@ -70,6 +70,15 @@ TraderSTP::TraderSTP()
 
 TraderSTP::~TraderSTP()
 {
+	// 确保资源被正确清理
+	release();
+
+	// 清理动态库句柄
+	if (m_hInstSTP)
+	{
+		DLLHelper::free_library(m_hInstSTP);
+		m_hInstSTP = NULL;
+	}
 }
 
 bool TraderSTP::init(WTSVariant* params)
@@ -107,6 +116,12 @@ bool TraderSTP::init(WTSVariant* params)
 	m_strModule = getBinDir() + DLLHelper::wrap_module(module.c_str(), "");
 
 	m_hInstSTP = DLLHelper::load_library(m_strModule.c_str());
+	if (!m_hInstSTP)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderSTP] Failed to load STP library: {}", m_strModule);
+		return false;
+	}
+
 #ifdef _WIN32
 #	ifdef _WIN64
 	const char* creatorName = "CreateStpTradeApi";
@@ -117,6 +132,13 @@ bool TraderSTP::init(WTSVariant* params)
 	const char* creatorName = "CreateStpTradeApi";
 #endif
 	m_funcCreator = (STPCreator)DLLHelper::get_symbol(m_hInstSTP, creatorName);
+	if (!m_funcCreator)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderSTP] Failed to get CreateStpTradeApi function from library");
+		DLLHelper::free_library(m_hInstSTP);
+		m_hInstSTP = NULL;
+		return false;
+	}
 
 	return true;
 }
@@ -146,10 +168,23 @@ void TraderSTP::release()
 
 void TraderSTP::connect()
 {
+	if (!m_funcCreator)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderSTP] STP library not loaded, cannot connect");
+		return;
+	}
+
 	std::stringstream ss;
 	ss << m_strFlowDir << "flows/" << m_strBroker << "/" << m_strUser << "/";
 	boost::filesystem::create_directories(ss.str().c_str());
+
 	m_pUserAPI = m_funcCreator(ss.str().c_str());
+	if (!m_pUserAPI)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderSTP] Failed to create STP API instance");
+		return;
+	}
+
 	m_pUserAPI->RegisterSpi(this);
 	m_pUserAPI->SubscribePublicTopic(STP_TERT_QUICK);		// 注册公有流
 	m_pUserAPI->SubscribePrivateTopic(STP_TERT_QUICK);		// 注册私有流
@@ -326,18 +361,18 @@ int TraderSTP::orderInsert(WTSEntrust* entrust)
 
 	if(entrust->getOrderFlag() == WOF_NOR)
 	{
-		req.TimeCondition = STP_TC_GFD;
-		req.VolumeCondition = STP_VC_AV;
+		req.TimeCondition = STP_TC_GFD;  // '3' - 当日有效
+		req.VolumeCondition = STP_VC_AV; // '1' - 任何数量
 	}
 	else if (entrust->getOrderFlag() == WOF_FAK)
 	{
-		req.TimeCondition = STP_TC_IOC;
-		req.VolumeCondition = STP_VC_AV;
+		req.TimeCondition = STP_TC_IOC;  // '1' - 立即完成，否则撤销
+		req.VolumeCondition = STP_VC_AV; // '1' - 任何数量
 	}
 	else if (entrust->getOrderFlag() == WOF_FOK)
 	{
-		req.TimeCondition = STP_TC_IOC;
-		req.VolumeCondition = STP_VC_CV;
+		req.TimeCondition = STP_TC_IOC;  // '1' - 立即完成，否则撤销
+		req.VolumeCondition = STP_VC_CV; // '3' - 全部数量
 	}
 
 	int iResult = m_pUserAPI->ReqInsertOrder(&req, genRequestID());
@@ -598,7 +633,7 @@ void TraderSTP::OnRspErrCancelOrder(StpOrderCancelReqField* pOrderAction, StpRsp
 
 void TraderSTP::OnQryAccountAsset(StpUserAccountAssetField* pAccount, int count, StpRspInfoField* pRspInfo, int64_t nClientRequestId)
 {
-	if (!IsErrorRspInfo(pRspInfo))
+	if (!IsErrorRspInfo(pRspInfo) && pAccount)
 	{
 		WTSAccountInfo* accountInfo = WTSAccountInfo::create();
 		accountInfo->setBalance(pAccount->Balance);
@@ -619,6 +654,10 @@ void TraderSTP::OnQryAccountAsset(StpUserAccountAssetField* pAccount, int count,
 			m_sink->onRspAccount(ay);
 
 		ay->release();
+	}
+	else if (IsErrorRspInfo(pRspInfo))
+	{
+		write_log(m_sink, LL_ERROR, "[TraderSTP] Query account failed: {}", pRspInfo->ErrorMsg);
 	}
 
 	m_bInQuery = false;
@@ -780,9 +819,13 @@ bool TraderSTP::makeEntrustID(char* buffer, int length)
 		fmt::format_to(buffer, "{:06d}", orderref);
 		return true;
 	}
+	catch (const std::exception& e)
+	{
+		write_log(m_sink, LL_ERROR, "[TraderSTP] makeEntrustID failed: {}", e.what());
+	}
 	catch (...)
 	{
-
+		write_log(m_sink, LL_ERROR, "[TraderSTP] makeEntrustID failed with unknown exception");
 	}
 
 	return false;
@@ -986,7 +1029,20 @@ int TraderSTP::wrapDirectionType(WTSDirectionType dirType, WTSOffsetType offType
 
 WTSDirectionType TraderSTP::wrapDirectionType(char dirType, char offType)
 {
-	return static_cast<WTSDirectionType>(dirType);
+	// 根据STP的方向字段正确映射到WTS方向
+	if (dirType == STP_D_Buy)
+	{
+		// 买入：如果是开仓则为多头，如果是平仓则为空头平仓
+		return (offType == STP_OF_Open) ? WDT_LONG : WDT_SHORT;
+	}
+	else if (dirType == STP_D_Sell)
+	{
+		// 卖出：如果是开仓则为空头，如果是平仓则为多头平仓
+		return (offType == STP_OF_Open) ? WDT_SHORT : WDT_LONG;
+	}
+
+	// 默认返回多头
+	return WDT_LONG;
 }
 
 int TraderSTP::wrapOffsetType(WTSOffsetType offType)
@@ -1005,7 +1061,22 @@ int TraderSTP::wrapOffsetType(WTSOffsetType offType)
 
 WTSOffsetType TraderSTP::wrapOffsetType(char offType)
 {
-	return static_cast<WTSOffsetType>(offType);
+	// 根据STP的开平标志映射到WTS开平类型
+	switch (offType)
+	{
+	case STP_OF_Open:
+		return WOT_OPEN;
+	case STP_OF_Close:
+		return WOT_CLOSE;
+	case STP_OF_CloseToday:
+		return WOT_CLOSETODAY;
+	case STP_OF_CloseYesterday:
+		return WOT_CLOSEYESTERDAY;
+	case STP_OF_ForceClose:
+		return WOT_FORCECLOSE;
+	default:
+		return WOT_OPEN;
+	}
 }
 
 WTSDirectionType TraderSTP::wrapPosDirection(char dirType)
@@ -1036,25 +1107,4 @@ int TraderSTP::wrapActionFlag(WTSActionFlag actionFlag)
 	return actionFlag;
 }
 
-// 常量补充
-#ifndef STP_TC_GFD
-#define STP_TC_GFD '0'
-#endif
-#ifndef STP_TC_IOC
-#define STP_TC_IOC '1'
-#endif
-#ifndef STP_VC_AV
-#define STP_VC_AV '1'
-#endif
-#ifndef STP_VC_MV
-#define STP_VC_MV '2'
-#endif
-#ifndef WOF_NOR
-#define WOF_NOR 0
-#endif
-#ifndef WOF_FAK
-#define WOF_FAK 1
-#endif
-#ifndef WOF_FOK
-#define WOF_FOK 2
-#endif
+// 注意：STP常量已在StpDataType.h中定义，无需重复定义

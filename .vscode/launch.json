@@ -1,28 +1,69 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Debug WtRunner",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "/root/trading_sys/wondertrader/src/build_debug/build_x64/Debug/bin/WtRunner/WtRunner",
-      "args": [
-        "-c", "config.yaml",
-        "-l", "logcfg.yaml"
-      ],
-      "stopAtEntry": false,
-      "cwd": "/root/trading_sys/wondertrader/src/build_debug/build_x64/Debug/bin/WtRunner",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "setupCommands": [
+    "version": "0.2.0",
+    "configurations": [
         {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
+            "name": "调试 TraderSTP",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/prj_bin/test_stp_debug",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/prj_bin",
+            "environment": [
+                {
+                    "name": "LD_LIBRARY_PATH",
+                    "value": "${workspaceFolder}/prj_bin:${workspaceFolder}/prj_bin/libs:${workspaceFolder}/src/build_all/build_x64/Release/bin:$LD_LIBRARY_PATH"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "将反汇编风格设置为 Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "编译 TraderSTP 测试程序",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "logging": {
+                "moduleLoad": false,
+                "trace": false,
+                "engineLogging": false,
+                "programOutput": true,
+                "exceptions": true
+            }
+        },
+        {
+            "name": "调试 TestTraderSTP (原版)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/build_all/build_x64/Release/bin/TestTraderSTP/TestTraderSTP",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/prj_bin",
+            "environment": [
+                {
+                    "name": "LD_LIBRARY_PATH",
+                    "value": "${workspaceFolder}/prj_bin/libs:${workspaceFolder}/src/build_all/build_x64/Release/bin:$LD_LIBRARY_PATH"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "编译所有项目",
+            "miDebuggerPath": "/usr/bin/gdb"
         }
-      ],
-      "miDebuggerPath": "/usr/bin/gdb"
-    }
-  ]
+    ]
 }

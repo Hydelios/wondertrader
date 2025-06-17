@@ -1,0 +1,29 @@
+# TraderSTP 配置文件示例
+traders:
+-   active: true
+    id: stp_test           # STP交易通道ID
+    module: TraderSTP      # 模块文件名，linux会自动转成libTraderSTP.so
+    savedata: true         # 是否保存数据到本地文件
+    riskmon:               # 通道风控配置
+        active: true       # 是否开启风控
+        policy:            # 风控策略
+            default:       # 默认策略
+                cancel_stat_timespan: 10    # 撤单流控统计时间窗口，单位s
+                cancel_times_boundary: 20   # 时间窗口内最大撤单次数
+                cancel_total_limits: 470    # 单日最大撤单笔数
+                order_stat_timespan: 10     # 下单流控统计时间窗口，单位s
+                order_times_boundary: 20    # 时间窗口内最大下单次数
+    
+    # === STP 特有配置参数 ===
+    front: 
+        - "tcp://127.0.0.1:9999"     # STP前置机地址，支持多个
+        - "tcp://127.0.0.1:9998"     # 备用前置机地址
+    broker: "STP_BROKER"             # STP券商代码
+    user: "your_stp_username"        # STP用户名
+    pass: "your_stp_password"        # STP密码
+    stpmodule: "stptradeapi"         # STP模块名，默认为stptradeapi
+    flowdir: "STPTDFlow"             # 数据流存储目录，可自定义
+    
+    # === 可选配置参数 ===
+    # prodinfo: "STP_CLIENT_V1.0"    # 产品信息
+    # tag: "STP_TAG"                 # 标签信息

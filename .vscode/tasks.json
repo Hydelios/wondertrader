@@ -1,0 +1,110 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "编译 TraderSTP 测试程序",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-std=c++17",
+                "-g",
+                "-O0",
+                "-Wall",
+                "-Wextra",
+                "-I${workspaceFolder}/src/Includes",
+                "-I${workspaceFolder}/src/Share",
+                "-I${workspaceFolder}/3rd/mydeps_gcc8.4.0/mydeps/include",
+                "-L${workspaceFolder}/prj_bin",
+                "-L${workspaceFolder}/prj_bin/libs",
+                "-L${workspaceFolder}/src/build_all/build_x64/Release/libs",
+                "${workspaceFolder}/prj_bin/test_stp_debug.cpp",
+                "-o",
+                "${workspaceFolder}/prj_bin/test_stp_debug",
+                "-lTraderSTP",
+                "-lWTSTools",
+                "-lWTSUtils",
+                "-lpthread",
+                "-ldl"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/prj_bin"
+            },
+            "problemMatcher": ["$gcc"],
+            "detail": "编译 TraderSTP 调试测试程序"
+        },
+        {
+            "label": "编译所有项目",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "build_release.sh"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/src"
+            },
+            "problemMatcher": ["$gcc"],
+            "detail": "编译整个 WonderTrader 项目"
+        },
+        {
+            "label": "拷贝库文件到 prj_bin",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "copy_files_to_prj_bin.sh"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/prj_bin"
+            },
+            "detail": "拷贝所有必要的库文件到调试目录"
+        },
+        {
+            "label": "清理 TraderSTP 调试文件",
+            "type": "shell",
+            "command": "rm",
+            "args": [
+                "-f",
+                "test_stp_debug",
+                "*.o"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/prj_bin"
+            },
+            "detail": "清理 TraderSTP 调试相关的编译文件"
+        }
+    ]
+}
