@@ -116,14 +116,14 @@ private:
 
 	int wrapPriceType(WTSPriceType priceType);
 	int wrapDirectionType(WTSDirectionType dirType, WTSOffsetType offType);
+	WTSDirectionType wrapDirectionType(char dirType, char offType);
 	int wrapOffsetType(WTSOffsetType offType);
+	WTSOffsetType wrapOffsetType(char offType);
 	int	wrapTimeCondition(WTSTimeCondition timeCond);
 	int wrapActionFlag(WTSActionFlag actionFlag);
 
 	WTSPriceType		wrapPriceType(char priceType);
-	WTSDirectionType	wrapDirectionType(char dirType, char offType);
 	WTSDirectionType	wrapPosDirection(char dirType);
-	WTSOffsetType		wrapOffsetType(char offType);
 	WTSTimeCondition	wrapTimeCondition(char timeCond);
 	WTSOrderState		wrapOrderState(char orderState);
 

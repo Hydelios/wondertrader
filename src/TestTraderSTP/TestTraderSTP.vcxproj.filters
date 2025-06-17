@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{D4E5B6A2-1B2C-4B2A-8A2B-1A2B3C4D5E6F}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{A1B2C3D4-E5F6-4A2B-8A2B-1A2B3C4D5E6F}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClInclude Include="../TraderSTP/TraderSTP.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

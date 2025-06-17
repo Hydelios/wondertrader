@@ -257,10 +257,8 @@ int TraderSTP::doLogin()
 {
 	StpOperatorLoginReqField req;
 	memset(&req, 0, sizeof(req));
-	wt_strcpy(req.BrokerID, m_strBroker.c_str(), m_strBroker.size());
-	wt_strcpy(req.UserID, m_strUser.c_str(), m_strUser.size());
-	wt_strcpy(req.Password, m_strPass.c_str(), m_strPass.size());
-	wt_strcpy(req.UserProductInfo, m_strProdInfo.c_str(), m_strProdInfo.size());
+	wt_strcpy(req.LoginID, m_strUser.c_str(), sizeof(req.LoginID));
+	wt_strcpy(req.Password, m_strPass.c_str(), sizeof(req.Password));
 	int iResult = m_pUserAPI->ReqOperatorlogin(&req, genRequestID());
 	if (iResult != 0)
 	{
@@ -296,22 +294,19 @@ int TraderSTP::orderInsert(WTSEntrust* entrust)
 
 	StpOrderInsertReqField req;
 	memset(&req, 0, sizeof(req));
-	wt_strcpy(req.BrokerID, m_strBroker.c_str(), m_strBroker.size());
-	wt_strcpy(req.InvestorID, m_strUser.c_str(), m_strUser.size());
-
-	wt_strcpy(req.InstrumentID, entrust->getCode());
-	wt_strcpy(req.ExchangeID, entrust->getExchg());
+	wt_strcpy(req.AccountID, m_strUser.c_str(), sizeof(req.AccountID));
+	wt_strcpy(req.OperatorID, m_strUser.c_str(), sizeof(req.OperatorID));
+	wt_strcpy(req.InstrumentID, entrust->getCode(), sizeof(req.InstrumentID));
+	wt_strcpy(req.ExchangeID, entrust->getExchg(), sizeof(req.ExchangeID));
 
 	if (strlen(entrust->getUserTag()) == 0)
 	{
-		///报单引用
 		fmt::format_to(req.OrderRef, "{}", m_orderRef.fetch_add(1));
 	}
 	else
 	{
 		uint32_t orderref;
 		extractEntrustID(entrust->getEntrustID(), orderref);
-		///报单引用
 		fmt::format_to(req.OrderRef, "{}", orderref);
 	}
 
@@ -322,15 +317,11 @@ int TraderSTP::orderInsert(WTSEntrust* entrust)
 		});
 	}
 
-	///报单价格条件: 限价
 	req.OrderPriceType = wrapPriceType(entrust->getPriceType());
-	///买卖方向: 
 	req.Direction = wrapDirectionType(entrust->getDirection(), entrust->getOffsetType());
-	///组合开平标志: 开仓
-	req.CombOffsetFlag = wrapOffsetType(entrust->getOffsetType());
-	///价格
+	memset(req.CombOffsetFlag, 0, sizeof(req.CombOffsetFlag));
+	req.CombOffsetFlag[0] = wrapOffsetType(entrust->getOffsetType());
 	req.LimitPrice = entrust->getPrice();
-	///数量: 1
 	req.VolumeTotalOriginal = (int)entrust->getVolume();
 
 	if(entrust->getOrderFlag() == WOF_NOR)
@@ -369,19 +360,12 @@ int TraderSTP::orderAction(WTSEntrustAction* action)
 
 	StpOrderCancelReqField req;
 	memset(&req, 0, sizeof(req));
-	wt_strcpy(req.BrokerID, m_strBroker.c_str(), m_strBroker.size());
-	wt_strcpy(req.InvestorID, m_strUser.c_str(), m_strUser.size());
+	wt_strcpy(req.AccountID, m_strUser.c_str(), sizeof(req.AccountID));
+	wt_strcpy(req.OperatorID, m_strUser.c_str(), sizeof(req.OperatorID));
 
-	///报单引用
 	fmt::format_to(req.OrderRef, "{}", orderref);
-	///操作标志
-	req.ActionFlag = wrapActionFlag(action->getActionFlag());
-	///合约代码
-	wt_strcpy(req.InstrumentID, action->getCode());
 
-	wt_strcpy(req.OrderSysID, action->getOrderID());
-	wt_strcpy(req.ExchangeID, action->getExchg());
-
+	// 其他字段如OrderLocalID、OrderIP等可根据需要补充
 	int iResult = m_pUserAPI->ReqCancelOrder(&req, genRequestID());
 	if (iResult != 0)
 	{
@@ -403,8 +387,7 @@ int TraderSTP::queryAccount()
 		m_queQuery.push([this]() {
 			StpQryAccountAssetField req;
 			memset(&req, 0, sizeof(req));
-			wt_strcpy(req.BrokerID, m_strBroker.c_str(), m_strBroker.size());
-			wt_strcpy(req.InvestorID, m_strUser.c_str(), m_strUser.size());
+			wt_strcpy(req.AccountID, m_strUser.c_str(), sizeof(req.AccountID));
 			m_pUserAPI->ReqQryAccountAsset(&req, genRequestID());
 		});
 	}
@@ -424,8 +407,7 @@ int TraderSTP::queryPositions()
 		m_queQuery.push([this]() {
 			StpQryPositionField req;
 			memset(&req, 0, sizeof(req));
-			wt_strcpy(req.BrokerID, m_strBroker.c_str(), m_strBroker.size());
-			wt_strcpy(req.InvestorID, m_strUser.c_str(), m_strUser.size());
+			wt_strcpy(req.AccountID, m_strUser.c_str(), sizeof(req.AccountID));
 			m_pUserAPI->ReqQryPosition(&req, genRequestID());
 		});
 	}
@@ -445,9 +427,7 @@ int TraderSTP::queryOrders()
 		m_queQuery.push([this]() {
 			StpQryOrderField req;
 			memset(&req, 0, sizeof(req));
-			wt_strcpy(req.BrokerID, m_strBroker.c_str(), m_strBroker.size());
-			wt_strcpy(req.InvestorID, m_strUser.c_str(), m_strUser.size());
-
+			wt_strcpy(req.AccountID, m_strUser.c_str(), sizeof(req.AccountID));
 			m_pUserAPI->ReqQryOrder(&req, genRequestID());
 		});
 	}
@@ -467,9 +447,7 @@ int TraderSTP::queryTrades()
 		m_queQuery.push([this]() {
 			StpQryTradeField req;
 			memset(&req, 0, sizeof(req));
-			wt_strcpy(req.BrokerID, m_strBroker.c_str(), m_strBroker.size());
-			wt_strcpy(req.InvestorID, m_strUser.c_str(), m_strUser.size());
-
+			wt_strcpy(req.AccountID, m_strUser.c_str(), sizeof(req.AccountID));
 			m_pUserAPI->ReqQryTrade(&req, genRequestID());
 		});
 	}
@@ -623,18 +601,17 @@ void TraderSTP::OnQryAccountAsset(StpUserAccountAssetField* pAccount, int count,
 	if (!IsErrorRspInfo(pRspInfo))
 	{
 		WTSAccountInfo* accountInfo = WTSAccountInfo::create();
-		accountInfo->setPreBalance(pAccount->PreBalance);
-		accountInfo->setCloseProfit(pAccount->CloseProfit);
-		accountInfo->setDynProfit(pAccount->PositionProfit);
-		accountInfo->setMargin(pAccount->CurrMargin);
-		accountInfo->setAvailable(pAccount->Available);
-		accountInfo->setCommission(pAccount->Commission);
-		accountInfo->setFrozenMargin(pAccount->FrozenMargin);
-		accountInfo->setFrozenCommission(pAccount->FrozenCommission);
-		accountInfo->setDeposit(pAccount->Deposit);
-		accountInfo->setWithdraw(pAccount->Withdraw);
-		accountInfo->setBalance(accountInfo->getPreBalance() + accountInfo->getCloseProfit() - accountInfo->getCommission() + accountInfo->getDeposit() - accountInfo->getWithdraw());
+		accountInfo->setBalance(pAccount->Balance);
+		accountInfo->setAvailable(pAccount->EnableBalance);
 		accountInfo->setCurrency("CNY");
+		accountInfo->setDynProfit(pAccount->PositionProfit);
+		accountInfo->setCloseProfit(pAccount->CloseProfit);
+		accountInfo->setMargin(pAccount->OccupyMargin);
+		accountInfo->setFrozenMargin(0);
+		accountInfo->setFrozenCommission(0);
+		accountInfo->setCommission(0);
+		accountInfo->setDeposit(0);
+		accountInfo->setWithdraw(0);
 
 		WTSArray * ay = WTSArray::create();
 		ay->append(accountInfo, false);
@@ -668,10 +645,9 @@ void TraderSTP::OnQryPosition(StpUserComboPositionField* pPosition, int count, S
 			}
 			pos->setDirection(wrapPosDirection(pPosition->PosiDirection));
 			pos->setNewPosition(pPosition->TodayPosition);
-			pos->setPrePosition(pPosition->Position - pPosition->TodayPosition);
-
+			pos->setPrePosition(pPosition->YdPosition);
 			pos->setMargin(pos->getMargin() + pPosition->UseMargin);
-			pos->setDynProfit(pos->getDynProfit() + pPosition->PositionProfit);
+			pos->setDynProfit(pos->getDynProfit() + pPosition->FloatProfit);
 			pos->setPositionCost(pos->getPositionCost() + pPosition->PositionCost);
 
 			if (pos->getTotalPosition() != 0)
@@ -683,33 +659,9 @@ void TraderSTP::OnQryPosition(StpUserComboPositionField* pPosition, int count, S
 				pos->setAvgPrice(0);
 			}
 
-			if (commInfo->getCategoty() != CC_Combination)
-			{
-				int availNew = pPosition->TodayPosition;
-				if (pPosition->PosiDirection == STP_PD_Long)
-				{
-					availNew -= pPosition->ShortFrozen;
-				}
-				else
-				{
-					availNew -= pPosition->LongFrozen;
-				}
-				if (availNew < 0)
-					availNew = 0;
-				pos->setAvailNewPos(availNew);
-
-				double availPre = pos->getNewPosition() + pos->getPrePosition()
-					- pPosition->LongFrozen - pPosition->ShortFrozen
-					- pos->getAvailNewPos();
-				pos->setAvailPrePos(availPre);
-			}
-
-			if (decimal::lt(pos->getTotalPosition(), 0.0) && decimal::eq(pos->getMargin(), 0.0))
-			{
-				//有仓位,但是保证金为0,则说明是套利合约,单个合约的可用持仓全部置为0
-				pos->setAvailNewPos(0);
-				pos->setAvailPrePos(0);
-			}
+			// 可用数量直接用 EnableVolume 字段
+			pos->setAvailNewPos(pPosition->EnableVolume);
+			pos->setAvailPrePos(0);
 		}
 	}
 
@@ -846,9 +798,9 @@ WTSOrderInfo* TraderSTP::makeOrderInfo(StpOrderField* orderField)
 	pRet->setContractInfo(contract);
 	pRet->setPrice(orderField->LimitPrice);
 	pRet->setVolume(orderField->VolumeTotalOriginal);
-	pRet->setDirection(wrapDirectionType(orderField->Direction, orderField->CombOffsetFlag));
+	pRet->setDirection(wrapDirectionType(orderField->Direction, orderField->CombOffsetFlag[0]));
 	pRet->setPriceType(wrapPriceType(orderField->OrderPriceType));
-	pRet->setOffsetType(wrapOffsetType(orderField->CombOffsetFlag));
+	pRet->setOffsetType(wrapOffsetType(orderField->CombOffsetFlag[0]));
 
 	if (orderField->TimeCondition == STP_TC_GFD)
 	{
@@ -863,20 +815,18 @@ WTSOrderInfo* TraderSTP::makeOrderInfo(StpOrderField* orderField)
 	}
 
 	pRet->setVolTraded(orderField->VolumeTraded);
-	pRet->setVolLeft(orderField->VolumeTotal);
+	pRet->setVolLeft(orderField->VolumeTotalOriginal - orderField->VolumeTraded);
 
 	pRet->setCode(orderField->InstrumentID);
 	pRet->setExchange(contract->getExchg());
 
-	uint32_t uTime = strToTime(orderField->InsertTime);
+	// STP 没有 InsertTime，直接用当前时间
 	uint32_t uDate = TimeUtils::getCurDate();
-
 	pRet->setOrderDate(uDate);
-	pRet->setOrderTime(TimeUtils::makeTime(uDate, uTime * 1000));
+	pRet->setOrderTime(TimeUtils::getLocalTimeNow());
 
 	pRet->setOrderState(wrapOrderState(orderField->OrderStatus));
-	if (orderField->OrderSubmitStatus >= STP_OSS_InsertRejected)
-		pRet->setError(true);		
+	// STP 没有 OrderSubmitStatus，直接不做错误标记
 
 	generateEntrustID(pRet->getEntrustID(), atoi(orderField->OrderRef));
 	pRet->setOrderID(orderField->OrderSysID);
@@ -917,10 +867,10 @@ WTSEntrust* TraderSTP::makeEntrust(StpOrderInsertReqField *entrustField)
 
 	pRet->setContractInfo(ct);
 
-	pRet->setDirection(wrapDirectionType(entrustField->Direction, entrustField->CombOffsetFlag));
+	pRet->setDirection(wrapDirectionType(entrustField->Direction, entrustField->CombOffsetFlag[0]));
 	pRet->setPriceType(wrapPriceType(entrustField->OrderPriceType));
-	pRet->setOffsetType(wrapOffsetType(entrustField->CombOffsetFlag));
-	
+	pRet->setOffsetType(wrapOffsetType(entrustField->CombOffsetFlag[0]));
+
 	if (entrustField->TimeCondition == STP_TC_GFD)
 	{
 		pRet->setOrderFlag(WOF_NOR);
@@ -944,9 +894,9 @@ WTSEntrust* TraderSTP::makeEntrust(StpOrderInsertReqField *entrustField)
 
 WTSEntrustAction* TraderSTP::makeAction(StpOrderCancelReqField *actionField)
 {
-	WTSEntrustAction* pRet = WTSEntrustAction::create(actionField->InstrumentID, actionField->ExchangeID);
-	pRet->setOrderID(actionField->OrderSysID);
-
+	// STP 撤单只需 AccountID、OperatorID、OrderRef，无法直接获取合约信息，需外部补充
+	WTSEntrustAction* pRet = WTSEntrustAction::create("", "");
+	pRet->setOrderID(actionField->OrderRef); // 用 OrderRef 作为唯一标识
 	generateEntrustID(pRet->getEntrustID(), atoi(actionField->OrderRef));
 
 	const char* usertag = m_eidCache.get(pRet->getEntrustID());
@@ -974,11 +924,9 @@ WTSTradeInfo* TraderSTP::makeTradeInfo(StpTradeField *tradeField)
 	pRet->setTradeID(tradeField->TradeID);
 	pRet->setContractInfo(contract);
 
-	uint32_t uTime = strToTime(tradeField->TradeTime);
 	uint32_t uDate = TimeUtils::getCurDate();
-
 	pRet->setTradeDate(uDate);
-	pRet->setTradeTime(TimeUtils::makeTime(uDate, uTime * 1000));
+	pRet->setTradeTime(TimeUtils::getLocalTimeNow());
 
 	WTSDirectionType dType = wrapDirectionType(tradeField->Direction, tradeField->OffsetFlag);
 
@@ -1006,7 +954,7 @@ int TraderSTP::wrapPriceType(WTSPriceType priceType)
 	else if (WPT_BESTPRICE == priceType)
 		return STP_OPT_BestPrice;
 	else
-		return STP_OPT_LastPrice;
+		return STP_OPT_LimitPrice;
 }
 
 WTSPriceType TraderSTP::wrapPriceType(char priceType)
@@ -1018,9 +966,10 @@ WTSPriceType TraderSTP::wrapPriceType(char priceType)
 	else if (STP_OPT_BestPrice == priceType)
 		return WPT_BESTPRICE;
 	else
-		return WPT_LASTPRICE;
+		return WPT_LIMITPRICE;
 }
 
+// STP方向/开平辅助函数，参数类型全部为 char
 int TraderSTP::wrapDirectionType(WTSDirectionType dirType, WTSOffsetType offType)
 {
 	if (WDT_LONG == dirType)
@@ -1037,24 +986,7 @@ int TraderSTP::wrapDirectionType(WTSDirectionType dirType, WTSOffsetType offType
 
 WTSDirectionType TraderSTP::wrapDirectionType(char dirType, char offType)
 {
-	if (STP_D_Buy == dirType)
-		if (offType == STP_OF_Open)
-			return WDT_LONG;
-		else
-			return WDT_SHORT;
-	else
-		if (offType == STP_OF_Open)
-			return WDT_SHORT;
-		else
-			return WDT_LONG;
-}
-
-WTSDirectionType TraderSTP::wrapPosDirection(char dirType)
-{
-	if (STP_PD_Long == dirType)
-		return WDT_LONG;
-	else
-		return WDT_SHORT;
+	return static_cast<WTSDirectionType>(dirType);
 }
 
 int TraderSTP::wrapOffsetType(WTSOffsetType offType)
@@ -1073,24 +1005,15 @@ int TraderSTP::wrapOffsetType(WTSOffsetType offType)
 
 WTSOffsetType TraderSTP::wrapOffsetType(char offType)
 {
-	if (STP_OF_Open == offType)
-		return WOT_OPEN;
-	else if (STP_OF_Close == offType)
-		return WOT_CLOSE;
-	else if (STP_OF_CloseToday == offType)
-		return WOT_CLOSETODAY;
-	else
-		return WOT_FORCECLOSE;
+	return static_cast<WTSOffsetType>(offType);
 }
 
-int TraderSTP::wrapTimeCondition(WTSTimeCondition timeCond)
+WTSDirectionType TraderSTP::wrapPosDirection(char dirType)
 {
-	if (WTC_IOC == timeCond)
-		return STP_TC_IOC;
-	else if (WTC_GFD == timeCond)
-		return STP_TC_GFD;
+	if (STP_PD_Long == dirType)
+		return WDT_LONG;
 	else
-		return STP_TC_GFS;
+		return WDT_SHORT;
 }
 
 WTSTimeCondition TraderSTP::wrapTimeCondition(char timeCond)
@@ -1105,18 +1028,33 @@ WTSTimeCondition TraderSTP::wrapTimeCondition(char timeCond)
 
 WTSOrderState TraderSTP::wrapOrderState(char orderState)
 {
-	if (orderState == STP_OST_PartTradedNotQueueing)
-		return WOS_Canceled;
-	else if (orderState == STP_OST_Unknown)
-		return WOS_Submitting;
-	else
-		return (WTSOrderState)orderState;
+	return (WTSOrderState)orderState;
 }
 
 int TraderSTP::wrapActionFlag(WTSActionFlag actionFlag)
 {
-	if (WAF_CANCEL == actionFlag)
-		return STP_AF_Delete;
-	else
-		return STP_AF_Modify;
+	return actionFlag;
 }
+
+// 常量补充
+#ifndef STP_TC_GFD
+#define STP_TC_GFD '0'
+#endif
+#ifndef STP_TC_IOC
+#define STP_TC_IOC '1'
+#endif
+#ifndef STP_VC_AV
+#define STP_VC_AV '1'
+#endif
+#ifndef STP_VC_MV
+#define STP_VC_MV '2'
+#endif
+#ifndef WOF_NOR
+#define WOF_NOR 0
+#endif
+#ifndef WOF_FAK
+#define WOF_FAK 1
+#endif
+#ifndef WOF_FOK
+#define WOF_FOK 2
+#endif
