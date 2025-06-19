@@ -1,0 +1,61 @@
+#基础配置文件
+basefiles:
+    commodity: ../common/commodities.json   #品种列表
+    contract: ../common/contracts.json      #合约列表
+    holiday: ../common/holidays.json        #节假日列表
+    hot: ../common/hots.json                #主力合约映射表
+    session: ../common/sessions.json        #交易时间模板
+
+#数据存储
+data:
+    store:
+        path: ../ZC_Data/      #中畅数据存储根目录
+
+#环境配置
+env:
+    name: cta               #引擎名称：cta/hft/sel
+    product:
+        session: TRADING    #驱动交易时间模板
+
+#中畅行情解析器配置
+parsers:
+- active: true
+  id: zc_parser
+  module: ParserZC
+  # 中畅服务器配置
+  host: "60.12.4.70"           # 中畅服务器IP地址
+  port: 30002                  # 中畅服务器端口
+  user: "ctclient"             # 中畅用户名
+  pass: "Ctzqclient601108!"    # 中畅密码
+  mode: 0                      # 登录模式: 0=TCP普通, 1=TCP LNK, 2=PGM组播, 3=MCB组播
+  async: false                 # 是否异步连接
+  timeout: 10000               # 连接超时时间(毫秒)
+  
+  # 代理配置(可选)
+  proxy:
+    type: 0                    # 代理类型: 0=无代理, 1=SOCKET5代理
+    host: ""                   # 代理服务器IP
+    port: 0                    # 代理服务器端口
+    user: ""                   # 代理用户名
+    pass: ""                   # 代理密码
+  
+  # 订阅合约列表
+  codes:
+  - "000001.SZSE"              # 深发展A
+  - "600000.SSE"               # 浦发银行
+  - "600036.SSE"               # 招商银行
+  - "cu2501.SHFE"              # 沪铜2501
+  - "al2501.SHFE"              # 沪铝2501
+  - "IF2501.CFFEX"             # 沪深300股指期货2501
+
+# 配置参数说明：
+# 1. host和port: 中畅行情服务器的IP地址和端口，需要根据实际情况配置
+# 2. user和pass: 中畅提供的用户凭证
+# 3. mode说明:
+#    - 0 (LOGIN_NR): TCP普通模式，适合一般客户端
+#    - 1 (LOGIN_LNK): TCP LNK模式，适合VIP客户端
+#    - 2 (LOGIN_PGM): PGM组播模式，仅支持Windows
+#    - 3 (LOGIN_MCB): MCB组播模式，双通道模式
+# 4. codes: 支持股票和期货的标准WonderTrader格式代码
+#    - 股票格式: 代码.交易所 (如: 600000.SSE, 000001.SZSE)
+#    - 期货格式: 合约.交易所 (如: cu2501.SHFE, IF2501.CFFEX) 
