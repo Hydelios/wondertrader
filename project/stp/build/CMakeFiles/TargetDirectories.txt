@@ -1,0 +1,4 @@
+/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/test_stp_debug.dir
+/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/copy_libs.dir
+/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/edit_cache.dir
+/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/rebuild_cache.dir

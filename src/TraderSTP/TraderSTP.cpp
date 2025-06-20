@@ -4,8 +4,8 @@
  *
  * \author Wesley
  * \date 2024/03/21
- * 
- * \brief 
+ *
+ * \brief
  */
 #include "TraderSTP.h"
 
@@ -22,28 +22,28 @@
 
 #include <boost/filesystem.hpp>
 
-//By Wesley @ 2022.01.05
+// By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
-template<typename... Args>
-inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, const Args&... args)
+template <typename... Args>
+inline void write_log(ITraderSpi *sink, WTSLogLevel ll, const char *format, const Args &...args)
 {
 	if (sink == NULL)
 		return;
 
-	const char* buffer = fmtutil::format(format, args...);
+	const char *buffer = fmtutil::format(format, args...);
 
 	sink->handleTraderLog(ll, buffer);
 }
 
 extern "C"
 {
-	EXPORT_FLAG ITraderApi* createTrader()
+	EXPORT_FLAG ITraderApi *createTrader()
 	{
 		TraderSTP *instance = new TraderSTP();
 		return instance;
 	}
 
-	EXPORT_FLAG void deleteTrader(ITraderApi* &trader)
+	EXPORT_FLAG void deleteTrader(ITraderApi *&trader)
 	{
 		if (NULL != trader)
 		{
@@ -54,17 +54,7 @@ extern "C"
 }
 
 TraderSTP::TraderSTP()
-	: m_pUserAPI(NULL)
-	, m_mapPosition(NULL)
-	, m_ayOrders(NULL)
-	, m_ayTrades(NULL)
-	, m_ayPosDetail(NULL)
-	, m_wrapperState(WS_NOTLOGIN)
-	, m_uLastQryTime(0)
-	, m_iRequestID(0)
-	, m_bInQuery(false)
-	, m_bStopped(false)
-	, m_lastQryTime(0)
+	: m_pUserAPI(NULL), m_mapPosition(NULL), m_ayOrders(NULL), m_ayTrades(NULL), m_ayPosDetail(NULL), m_wrapperState(WS_NOTLOGIN), m_uLastQryTime(0), m_iRequestID(0), m_bInQuery(false), m_bStopped(false), m_lastQryTime(0), m_sink(NULL), m_lDate(0), m_orderRef(0), m_bdMgr(NULL), m_hInstSTP(NULL), m_funcCreator(NULL)
 {
 }
 
@@ -81,7 +71,7 @@ TraderSTP::~TraderSTP()
 	}
 }
 
-bool TraderSTP::init(WTSVariant* params)
+bool TraderSTP::init(WTSVariant *params)
 {
 	auto fontItem = params->get("front");
 	if (fontItem)
@@ -123,13 +113,13 @@ bool TraderSTP::init(WTSVariant* params)
 	}
 
 #ifdef _WIN32
-#	ifdef _WIN64
-	const char* creatorName = "CreateStpTradeApi";
-#	else
-	const char* creatorName = "CreateStpTradeApi";
-#	endif
+#ifdef _WIN64
+	const char *creatorName = "CreateStpTradeApi";
 #else
-	const char* creatorName = "CreateStpTradeApi";
+	const char *creatorName = "CreateStpTradeApi";
+#endif
+#else
+	const char *creatorName = "CreateStpTradeApi";
 #endif
 	m_funcCreator = (STPCreator)DLLHelper::get_symbol(m_hInstSTP, creatorName);
 	if (!m_funcCreator)
@@ -186,8 +176,8 @@ void TraderSTP::connect()
 	}
 
 	m_pUserAPI->RegisterSpi(this);
-	m_pUserAPI->SubscribePublicTopic(STP_TERT_QUICK);		// 注册公有流
-	m_pUserAPI->SubscribePrivateTopic(STP_TERT_QUICK);		// 注册私有流
+	m_pUserAPI->SubscribePublicTopic(STP_TERT_QUICK);  // 注册公有流
+	m_pUserAPI->SubscribePrivateTopic(STP_TERT_QUICK); // 注册私有流
 
 	for (std::string front : m_strFront)
 	{
@@ -197,7 +187,7 @@ void TraderSTP::connect()
 			std::string addr = front.substr(0, pos);
 			uint16_t port = std::stoi(front.substr(pos + 1));
 			m_pUserAPI->RegisterFront(addr.c_str(), port);
-			m_sink->handleTraderLog(LL_INFO, fmtutil::format("registerFront: {}:{}", addr, port));
+			write_log(m_sink, LL_INFO, "registerFront: {}:{}", addr, port);
 		}
 	}
 
@@ -208,7 +198,8 @@ void TraderSTP::connect()
 
 	if (m_thrdWorker == NULL)
 	{
-		m_thrdWorker.reset(new StdThread([this](){
+		m_thrdWorker.reset(new StdThread([this]()
+										 {
 			while (!m_bStopped)
 			{
 				if(m_queQuery.empty() || m_bInQuery)
@@ -234,16 +225,14 @@ void TraderSTP::connect()
 				}
 
 				m_lastQryTime = TimeUtils::getLocalTimeNow();
-			}
-		}));
+			} }));
 	}
 }
 
 void TraderSTP::disconnect()
 {
-	m_queQuery.push([this]() {
-		release();
-	});
+	m_queQuery.push([this]()
+					{ release(); });
 
 	if (m_thrdWorker)
 	{
@@ -271,7 +260,7 @@ uint32_t TraderSTP::genRequestID()
 	return m_iRequestID.fetch_add(1) + 1;
 }
 
-int TraderSTP::login(const char* user, const char* pass, const char* productInfo)
+int TraderSTP::login(const char *user, const char *pass, const char *productInfo)
 {
 	m_strUser = user;
 	m_strPass = pass;
@@ -319,7 +308,7 @@ int TraderSTP::logout()
 	return 0;
 }
 
-int TraderSTP::orderInsert(WTSEntrust* entrust)
+int TraderSTP::orderInsert(WTSEntrust *entrust)
 {
 	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 	{
@@ -347,9 +336,8 @@ int TraderSTP::orderInsert(WTSEntrust* entrust)
 
 	if (strlen(entrust->getUserTag()) > 0)
 	{
-		m_eidCache.put(entrust->getEntrustID(), entrust->getUserTag(), 0, [this](const char* message) {
-			write_log(m_sink, LL_WARN, message);
-		});
+		m_eidCache.put(entrust->getEntrustID(), entrust->getUserTag(), 0, [this](const char *message)
+					   { write_log(m_sink, LL_WARN, message); });
 	}
 
 	req.OrderPriceType = wrapPriceType(entrust->getPriceType());
@@ -359,19 +347,19 @@ int TraderSTP::orderInsert(WTSEntrust* entrust)
 	req.LimitPrice = entrust->getPrice();
 	req.VolumeTotalOriginal = (int)entrust->getVolume();
 
-	if(entrust->getOrderFlag() == WOF_NOR)
+	if (entrust->getOrderFlag() == WOF_NOR)
 	{
-		req.TimeCondition = STP_TC_GFD;  // '3' - 当日有效
+		req.TimeCondition = STP_TC_GFD;	 // '3' - 当日有效
 		req.VolumeCondition = STP_VC_AV; // '1' - 任何数量
 	}
 	else if (entrust->getOrderFlag() == WOF_FAK)
 	{
-		req.TimeCondition = STP_TC_IOC;  // '1' - 立即完成，否则撤销
+		req.TimeCondition = STP_TC_IOC;	 // '1' - 立即完成，否则撤销
 		req.VolumeCondition = STP_VC_AV; // '1' - 任何数量
 	}
 	else if (entrust->getOrderFlag() == WOF_FOK)
 	{
-		req.TimeCondition = STP_TC_IOC;  // '1' - 立即完成，否则撤销
+		req.TimeCondition = STP_TC_IOC;	 // '1' - 立即完成，否则撤销
 		req.VolumeCondition = STP_VC_CV; // '3' - 全部数量
 	}
 
@@ -384,7 +372,7 @@ int TraderSTP::orderInsert(WTSEntrust* entrust)
 	return 0;
 }
 
-int TraderSTP::orderAction(WTSEntrustAction* action)
+int TraderSTP::orderAction(WTSEntrustAction *action)
 {
 	if (m_wrapperState != WS_ALLREADY)
 		return -1;
@@ -419,12 +407,12 @@ int TraderSTP::queryAccount()
 
 	{
 		StdUniqueLock lock(m_mtxQuery);
-		m_queQuery.push([this]() {
+		m_queQuery.push([this]()
+						{
 			StpQryAccountAssetField req;
 			memset(&req, 0, sizeof(req));
 			wt_strcpy(req.AccountID, m_strUser.c_str(), sizeof(req.AccountID));
-			m_pUserAPI->ReqQryAccountAsset(&req, genRequestID());
-		});
+			m_pUserAPI->ReqQryAccountAsset(&req, genRequestID()); });
 	}
 
 	return 0;
@@ -439,12 +427,12 @@ int TraderSTP::queryPositions()
 
 	{
 		StdUniqueLock lock(m_mtxQuery);
-		m_queQuery.push([this]() {
+		m_queQuery.push([this]()
+						{
 			StpQryPositionField req;
 			memset(&req, 0, sizeof(req));
 			wt_strcpy(req.AccountID, m_strUser.c_str(), sizeof(req.AccountID));
-			m_pUserAPI->ReqQryPosition(&req, genRequestID());
-		});
+			m_pUserAPI->ReqQryPosition(&req, genRequestID()); });
 	}
 
 	return 0;
@@ -459,12 +447,12 @@ int TraderSTP::queryOrders()
 
 	{
 		StdUniqueLock lock(m_mtxQuery);
-		m_queQuery.push([this]() {
+		m_queQuery.push([this]()
+						{
 			StpQryOrderField req;
 			memset(&req, 0, sizeof(req));
 			wt_strcpy(req.AccountID, m_strUser.c_str(), sizeof(req.AccountID));
-			m_pUserAPI->ReqQryOrder(&req, genRequestID());
-		});
+			m_pUserAPI->ReqQryOrder(&req, genRequestID()); });
 	}
 
 	return 0;
@@ -479,12 +467,12 @@ int TraderSTP::queryTrades()
 
 	{
 		StdUniqueLock lock(m_mtxQuery);
-		m_queQuery.push([this]() {
+		m_queQuery.push([this]()
+						{
 			StpQryTradeField req;
 			memset(&req, 0, sizeof(req));
 			wt_strcpy(req.AccountID, m_strUser.c_str(), sizeof(req.AccountID));
-			m_pUserAPI->ReqQryTrade(&req, genRequestID());
-		});
+			m_pUserAPI->ReqQryTrade(&req, genRequestID()); });
 	}
 
 	return 0;
@@ -502,7 +490,7 @@ void TraderSTP::OnFrontDisconnected(int nReason)
 		m_sink->handleEvent(WTE_Close, nReason);
 }
 
-void TraderSTP::OnRspOperatorLogin(StpRspLoginField* pRspLogin, int count, StpAccountInfoField* pAccountInfo, StpRspInfoField* pRspInfo, int64_t nClientRequestId)
+void TraderSTP::OnRspOperatorLogin(StpRspLoginField *pRspLogin, int count, StpAccountInfoField *pAccountInfo, StpRspInfoField *pRspInfo, int64_t nClientRequestId)
 {
 	if (!IsErrorRspInfo(pRspInfo))
 	{
@@ -510,36 +498,34 @@ void TraderSTP::OnRspOperatorLogin(StpRspLoginField* pRspLogin, int count, StpAc
 
 		// 保存会话参数
 		m_orderRef = 0;
-		///获取当前交易日
+		/// 获取当前交易日
 		m_lDate = TimeUtils::getCurDate();
 
 		write_log(m_sink, LL_INFO, "[TraderSTP][{}-{}] Login succeed, login time: {}...",
-			m_strBroker.c_str(), m_strUser.c_str(), pRspLogin->LoginTime);
+				  m_strBroker.c_str(), m_strUser.c_str(), pRspLogin->LoginTime);
 
 		{
-			//初始化委托单缓存器
+			// 初始化委托单缓存器
 			std::stringstream ss;
 			ss << m_strFlowDir << "local/" << m_strBroker << "/";
 			std::string path = StrUtil::standardisePath(ss.str());
 			if (!StdFile::exists(path.c_str()))
 				boost::filesystem::create_directories(path.c_str());
 			ss << m_strUser << "_eid.sc";
-			m_eidCache.init(ss.str().c_str(), m_lDate, [this](const char* message) {
-				write_log(m_sink, LL_WARN, message);
-			});
+			m_eidCache.init(ss.str().c_str(), m_lDate, [this](const char *message)
+							{ write_log(m_sink, LL_WARN, message); });
 		}
 
 		{
-			//初始化订单标记缓存器
+			// 初始化订单标记缓存器
 			std::stringstream ss;
 			ss << m_strFlowDir << "local/" << m_strBroker << "/";
 			std::string path = StrUtil::standardisePath(ss.str());
 			if (!StdFile::exists(path.c_str()))
 				boost::filesystem::create_directories(path.c_str());
 			ss << m_strUser << "_oid.sc";
-			m_oidCache.init(ss.str().c_str(), m_lDate, [this](const char* message) {
-				write_log(m_sink, LL_WARN, message);
-			});
+			m_oidCache.init(ss.str().c_str(), m_lDate, [this](const char *message)
+							{ write_log(m_sink, LL_WARN, message); });
 		}
 
 		write_log(m_sink, LL_INFO, "[TraderSTP][{}-{}] Login succeed, trading date: {}...", m_strBroker.c_str(), m_strUser.c_str(), m_lDate);
@@ -558,19 +544,19 @@ void TraderSTP::OnRspOperatorLogin(StpRspLoginField* pRspLogin, int count, StpAc
 	}
 }
 
-void TraderSTP::OnRspLogout(StpRspInfoField* pRspInfo)
+void TraderSTP::OnRspLogout(StpRspInfoField *pRspInfo)
 {
 	m_wrapperState = WS_NOTLOGIN;
 	if (m_sink)
 		m_sink->handleEvent(WTE_Logout, 0);
 }
 
-void TraderSTP::OnRspError(StpRspInfoField* pRspInfo)
+void TraderSTP::OnRspError(StpRspInfoField *pRspInfo)
 {
-	m_sink->handleTraderLog(LL_ERROR, fmtutil::format("Error: {} : {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg));
+	write_log(m_sink, LL_ERROR, "Error: {} : {}", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 }
 
-void TraderSTP::OnRtnOrder(StpOrderField* pOrder)
+void TraderSTP::OnRtnOrder(StpOrderField *pOrder)
 {
 	WTSOrderInfo *orderInfo = makeOrderInfo(pOrder);
 	if (orderInfo)
@@ -582,7 +568,7 @@ void TraderSTP::OnRtnOrder(StpOrderField* pOrder)
 	}
 }
 
-void TraderSTP::OnRtnTrade(StpTradeField* pTrade)
+void TraderSTP::OnRtnTrade(StpTradeField *pTrade)
 {
 	WTSTradeInfo *tRecord = makeTradeInfo(pTrade);
 	if (tRecord)
@@ -594,9 +580,9 @@ void TraderSTP::OnRtnTrade(StpTradeField* pTrade)
 	}
 }
 
-void TraderSTP::OnRspErrInsertOrder(StpOrderInsertReqField* pInputOrder, StpRspInfoField* pRspInfo, int64_t nClientRequestId)
+void TraderSTP::OnRspErrInsertOrder(StpOrderInsertReqField *pInputOrder, StpRspInfoField *pRspInfo, int64_t nClientRequestId)
 {
-	WTSEntrust* entrust = makeEntrust(pInputOrder);
+	WTSEntrust *entrust = makeEntrust(pInputOrder);
 	if (entrust)
 	{
 		WTSError *err = makeError(pRspInfo, WEC_ORDERINSERT);
@@ -605,7 +591,7 @@ void TraderSTP::OnRspErrInsertOrder(StpOrderInsertReqField* pInputOrder, StpRspI
 		entrust->release();
 		err->release();
 	}
-	else if(IsErrorRspInfo(pRspInfo))
+	else if (IsErrorRspInfo(pRspInfo))
 	{
 		WTSError *err = makeError(pRspInfo, WEC_ORDERINSERT);
 		if (m_sink)
@@ -614,12 +600,12 @@ void TraderSTP::OnRspErrInsertOrder(StpOrderInsertReqField* pInputOrder, StpRspI
 	}
 }
 
-void TraderSTP::OnRspErrCancelOrder(StpOrderCancelReqField* pOrderAction, StpRspInfoField* pRspInfo, int64_t nClientRequestId)
+void TraderSTP::OnRspErrCancelOrder(StpOrderCancelReqField *pOrderAction, StpRspInfoField *pRspInfo, int64_t nClientRequestId)
 {
 	if (IsErrorRspInfo(pRspInfo))
 	{
-		WTSError* error = WTSError::create(WEC_ORDERCANCEL, pRspInfo->ErrorMsg);
-		WTSEntrustAction* action = makeAction(pOrderAction);
+		WTSError *error = WTSError::create(WEC_ORDERCANCEL, pRspInfo->ErrorMsg);
+		WTSEntrustAction *action = makeAction(pOrderAction);
 		if (m_sink)
 			m_sink->onTraderError(error, action);
 
@@ -631,11 +617,11 @@ void TraderSTP::OnRspErrCancelOrder(StpOrderCancelReqField* pOrderAction, StpRsp
 	}
 }
 
-void TraderSTP::OnQryAccountAsset(StpUserAccountAssetField* pAccount, int count, StpRspInfoField* pRspInfo, int64_t nClientRequestId)
+void TraderSTP::OnQryAccountAsset(StpUserAccountAssetField *pAccount, int count, StpRspInfoField *pRspInfo, int64_t nClientRequestId)
 {
 	if (!IsErrorRspInfo(pRspInfo) && pAccount)
 	{
-		WTSAccountInfo* accountInfo = WTSAccountInfo::create();
+		WTSAccountInfo *accountInfo = WTSAccountInfo::create();
 		accountInfo->setBalance(pAccount->Balance);
 		accountInfo->setAvailable(pAccount->EnableBalance);
 		accountInfo->setCurrency("CNY");
@@ -648,7 +634,7 @@ void TraderSTP::OnQryAccountAsset(StpUserAccountAssetField* pAccount, int count,
 		accountInfo->setDeposit(0);
 		accountInfo->setWithdraw(0);
 
-		WTSArray * ay = WTSArray::create();
+		WTSArray *ay = WTSArray::create();
 		ay->append(accountInfo, false);
 		if (m_sink)
 			m_sink->onRspAccount(ay);
@@ -663,20 +649,20 @@ void TraderSTP::OnQryAccountAsset(StpUserAccountAssetField* pAccount, int count,
 	m_bInQuery = false;
 }
 
-void TraderSTP::OnQryPosition(StpUserComboPositionField* pPosition, int count, StpRspInfoField* pRspInfo, int64_t nClientRequestId)
+void TraderSTP::OnQryPosition(StpUserComboPositionField *pPosition, int count, StpRspInfoField *pRspInfo, int64_t nClientRequestId)
 {
 	if (!IsErrorRspInfo(pRspInfo) && pPosition)
 	{
 		if (NULL == m_mapPosition)
 			m_mapPosition = PositionMap::create();
 
-		WTSContractInfo* contract = m_bdMgr->getContract(pPosition->InstrumentID, pPosition->ExchangeID);
+		WTSContractInfo *contract = m_bdMgr->getContract(pPosition->InstrumentID, pPosition->ExchangeID);
 		if (contract)
 		{
-			WTSCommodityInfo* commInfo = contract->getCommInfo();
+			WTSCommodityInfo *commInfo = contract->getCommInfo();
 			std::string key = fmt::format("{}-{}", pPosition->InstrumentID, pPosition->PosiDirection);
-			WTSPositionItem* pos = (WTSPositionItem*)m_mapPosition->get(key);
-			if(pos == NULL)
+			WTSPositionItem *pos = (WTSPositionItem *)m_mapPosition->get(key);
+			if (pos == NULL)
 			{
 				pos = WTSPositionItem::create(pPosition->InstrumentID, commInfo->getCurrency(), commInfo->getExchg());
 				pos->setContractInfo(contract);
@@ -706,9 +692,9 @@ void TraderSTP::OnQryPosition(StpUserComboPositionField* pPosition, int count, S
 
 	if (count == 0)
 	{
-		WTSArray* ayPos = WTSArray::create();
+		WTSArray *ayPos = WTSArray::create();
 
-		if(m_mapPosition && m_mapPosition->size() > 0)
+		if (m_mapPosition && m_mapPosition->size() > 0)
 		{
 			for (auto it = m_mapPosition->begin(); it != m_mapPosition->end(); it++)
 			{
@@ -731,19 +717,19 @@ void TraderSTP::OnQryPosition(StpUserComboPositionField* pPosition, int count, S
 	m_bInQuery = false;
 }
 
-void TraderSTP::OnQryPositionDetail(StpPositionDetailField* pPosition, int count, StpRspInfoField* pRspInfo, int64_t nClientRequestId)
+void TraderSTP::OnQryPositionDetail(StpPositionDetailField *pPosition, int count, StpRspInfoField *pRspInfo, int64_t nClientRequestId)
 {
 	m_bInQuery = false;
 }
 
-void TraderSTP::OnQryOrder(StpOrderField* pOrder, int count, StpRspInfoField* pRspInfo, int64_t nClientRequestId)
+void TraderSTP::OnQryOrder(StpOrderField *pOrder, int count, StpRspInfoField *pRspInfo, int64_t nClientRequestId)
 {
 	if (!IsErrorRspInfo(pRspInfo) && pOrder)
 	{
 		if (NULL == m_ayOrders)
 			m_ayOrders = WTSArray::create();
 
-		WTSOrderInfo* orderInfo = makeOrderInfo(pOrder);
+		WTSOrderInfo *orderInfo = makeOrderInfo(pOrder);
 		if (orderInfo)
 		{
 			m_ayOrders->append(orderInfo, false);
@@ -762,14 +748,14 @@ void TraderSTP::OnQryOrder(StpOrderField* pOrder, int count, StpRspInfoField* pR
 	m_bInQuery = false;
 }
 
-void TraderSTP::OnQryTrade(StpTradeField* pTrade, int count, StpRspInfoField* pRspInfo, int64_t nClientRequestId)
+void TraderSTP::OnQryTrade(StpTradeField *pTrade, int count, StpRspInfoField *pRspInfo, int64_t nClientRequestId)
 {
 	if (!IsErrorRspInfo(pRspInfo) && pTrade)
 	{
 		if (NULL == m_ayTrades)
 			m_ayTrades = WTSArray::create();
 
-		WTSTradeInfo* trade = makeTradeInfo(pTrade);
+		WTSTradeInfo *trade = makeTradeInfo(pTrade);
 		if (trade)
 		{
 			m_ayTrades->append(trade, false);
@@ -796,18 +782,18 @@ bool TraderSTP::IsErrorRspInfo(StpRspInfoField *pRspInfo)
 	return false;
 }
 
-void TraderSTP::generateEntrustID(char* buffer, uint32_t orderRef)
+void TraderSTP::generateEntrustID(char *buffer, uint32_t orderRef)
 {
 	fmtutil::format_to(buffer, "{:06d}", orderRef);
 }
 
-bool TraderSTP::extractEntrustID(const char* entrustid, uint32_t &orderRef)
+bool TraderSTP::extractEntrustID(const char *entrustid, uint32_t &orderRef)
 {
 	orderRef = strtoul(entrustid, NULL, 10);
 	return true;
 }
 
-bool TraderSTP::makeEntrustID(char* buffer, int length)
+bool TraderSTP::makeEntrustID(char *buffer, int length)
 {
 	if (buffer == NULL || length == 0)
 		return false;
@@ -819,7 +805,7 @@ bool TraderSTP::makeEntrustID(char* buffer, int length)
 		fmt::format_to(buffer, "{:06d}", orderref);
 		return true;
 	}
-	catch (const std::exception& e)
+	catch (const std::exception &e)
 	{
 		write_log(m_sink, LL_ERROR, "[TraderSTP] makeEntrustID failed: {}", e.what());
 	}
@@ -831,13 +817,13 @@ bool TraderSTP::makeEntrustID(char* buffer, int length)
 	return false;
 }
 
-WTSOrderInfo* TraderSTP::makeOrderInfo(StpOrderField* orderField)
+WTSOrderInfo *TraderSTP::makeOrderInfo(StpOrderField *orderField)
 {
-	WTSContractInfo* contract = m_bdMgr->getContract(orderField->InstrumentID, orderField->ExchangeID);
+	WTSContractInfo *contract = m_bdMgr->getContract(orderField->InstrumentID, orderField->ExchangeID);
 	if (contract == NULL)
 		return NULL;
 
-	WTSOrderInfo* pRet = WTSOrderInfo::create();
+	WTSOrderInfo *pRet = WTSOrderInfo::create();
 	pRet->setContractInfo(contract);
 	pRet->setPrice(orderField->LimitPrice);
 	pRet->setVolume(orderField->VolumeTotalOriginal);
@@ -876,8 +862,8 @@ WTSOrderInfo* TraderSTP::makeOrderInfo(StpOrderField* orderField)
 
 	pRet->setStateMsg(orderField->StatusMsg);
 
-	const char* usertag = m_eidCache.get(pRet->getEntrustID());
-	if(strlen(usertag) == 0)
+	const char *usertag = m_eidCache.get(pRet->getEntrustID());
+	if (strlen(usertag) == 0)
 	{
 		pRet->setUserTag(pRet->getEntrustID());
 	}
@@ -887,22 +873,21 @@ WTSOrderInfo* TraderSTP::makeOrderInfo(StpOrderField* orderField)
 
 		if (strlen(pRet->getOrderID()) > 0)
 		{
-			m_oidCache.put(StrUtil::trim(pRet->getOrderID()).c_str(), usertag, 0, [this](const char* message) {
-				write_log(m_sink, LL_ERROR, message);
-			});
+			m_oidCache.put(StrUtil::trim(pRet->getOrderID()).c_str(), usertag, 0, [this](const char *message)
+						   { write_log(m_sink, LL_ERROR, message); });
 		}
 	}
 
 	return pRet;
 }
 
-WTSEntrust* TraderSTP::makeEntrust(StpOrderInsertReqField *entrustField)
+WTSEntrust *TraderSTP::makeEntrust(StpOrderInsertReqField *entrustField)
 {
-	WTSContractInfo* ct = m_bdMgr->getContract(entrustField->InstrumentID, entrustField->ExchangeID);
+	WTSContractInfo *ct = m_bdMgr->getContract(entrustField->InstrumentID, entrustField->ExchangeID);
 	if (ct == NULL)
 		return NULL;
 
-	WTSEntrust* pRet = WTSEntrust::create(
+	WTSEntrust *pRet = WTSEntrust::create(
 		entrustField->InstrumentID,
 		entrustField->VolumeTotalOriginal,
 		entrustField->LimitPrice,
@@ -928,36 +913,36 @@ WTSEntrust* TraderSTP::makeEntrust(StpOrderInsertReqField *entrustField)
 
 	generateEntrustID(pRet->getEntrustID(), atoi(entrustField->OrderRef));
 
-	const char* usertag = m_eidCache.get(pRet->getEntrustID());
+	const char *usertag = m_eidCache.get(pRet->getEntrustID());
 	if (strlen(usertag) > 0)
 		pRet->setUserTag(usertag);
 
 	return pRet;
 }
 
-WTSEntrustAction* TraderSTP::makeAction(StpOrderCancelReqField *actionField)
+WTSEntrustAction *TraderSTP::makeAction(StpOrderCancelReqField *actionField)
 {
 	// STP 撤单只需 AccountID、OperatorID、OrderRef，无法直接获取合约信息，需外部补充
-	WTSEntrustAction* pRet = WTSEntrustAction::create("", "");
+	WTSEntrustAction *pRet = WTSEntrustAction::create("", "");
 	pRet->setOrderID(actionField->OrderRef); // 用 OrderRef 作为唯一标识
 	generateEntrustID(pRet->getEntrustID(), atoi(actionField->OrderRef));
 
-	const char* usertag = m_eidCache.get(pRet->getEntrustID());
+	const char *usertag = m_eidCache.get(pRet->getEntrustID());
 	if (strlen(usertag) > 0)
 		pRet->setUserTag(usertag);
 
 	return pRet;
 }
 
-WTSError* TraderSTP::makeError(StpRspInfoField* rspInfo, WTSErroCode ec /* = WEC_NONE */)
+WTSError *TraderSTP::makeError(StpRspInfoField *rspInfo, WTSErroCode ec /* = WEC_NONE */)
 {
-	WTSError* pRet = WTSError::create(ec, fmtutil::format("{}({})", rspInfo->ErrorMsg, rspInfo->ErrorID));
+	WTSError *pRet = WTSError::create(ec, fmtutil::format("{}({})", rspInfo->ErrorMsg, rspInfo->ErrorID));
 	return pRet;
 }
 
-WTSTradeInfo* TraderSTP::makeTradeInfo(StpTradeField *tradeField)
+WTSTradeInfo *TraderSTP::makeTradeInfo(StpTradeField *tradeField)
 {
-	WTSContractInfo* contract = m_bdMgr->getContract(tradeField->InstrumentID, tradeField->ExchangeID);
+	WTSContractInfo *contract = m_bdMgr->getContract(tradeField->InstrumentID, tradeField->ExchangeID);
 	if (contract == NULL)
 		return NULL;
 
@@ -978,10 +963,10 @@ WTSTradeInfo* TraderSTP::makeTradeInfo(StpTradeField *tradeField)
 	pRet->setRefOrder(tradeField->OrderSysID);
 	pRet->setTradeType(WTT_Common);
 
-	double amount = contract->getCommInfo()->getVolScale()*tradeField->Volume*pRet->getPrice();
+	double amount = contract->getCommInfo()->getVolScale() * tradeField->Volume * pRet->getPrice();
 	pRet->setAmount(amount);
 
-	const char* usertag = m_oidCache.get(StrUtil::trim(pRet->getRefOrder()).c_str());
+	const char *usertag = m_oidCache.get(StrUtil::trim(pRet->getRefOrder()).c_str());
 	if (strlen(usertag))
 		pRet->setUserTag(usertag);
 
@@ -1020,11 +1005,10 @@ int TraderSTP::wrapDirectionType(WTSDirectionType dirType, WTSOffsetType offType
 			return STP_D_Buy;
 		else
 			return STP_D_Sell;
+	else if (offType == WOT_OPEN)
+		return STP_D_Sell;
 	else
-		if (offType == WOT_OPEN)
-			return STP_D_Sell;
-		else
-			return STP_D_Buy;
+		return STP_D_Buy;
 }
 
 WTSDirectionType TraderSTP::wrapDirectionType(char dirType, char offType)

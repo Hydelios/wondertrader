@@ -1,19 +1,23 @@
 {
     "configurations": [
-      {
-        "name": "Linux",
-        "includePath": [
-          "${workspaceFolder}/**",
-          "/usr/include",
-          "/usr/local/include"
-        ],
-        "defines": [],
-        "compilerPath": "/usr/bin/g++",
-        "cStandard": "gnu17",
-        "cppStandard": "gnu++17",
-        "intelliSenseMode": "linux-gcc-x64"
-      }
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/src/Includes",
+                "${workspaceFolder}/src/Share",
+                "${workspaceFolder}/project/stp/src",
+                "${workspaceFolder}/project/sipui/src",
+                "${workspaceFolder}/3rd/mydeps_gcc8.4.0/mydeps/include",
+                "/usr/include",
+                "/usr/local/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
     ],
     "version": 4
-  }
-  
+}
