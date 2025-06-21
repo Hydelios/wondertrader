@@ -91,7 +91,7 @@ build_project() {
     
     # 运行CMake配置
     echo -e "${YELLOW}⚙️  配置CMake...${NC}"
-    cmake -DCMAKE_BUILD_TYPE=Release \
+    cmake -DCMAKE_BUILD_TYPE=Debug \
           -DCMAKE_CXX_STANDARD=17 \
           "$SRC_DIR"
     

@@ -71,8 +71,8 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                "scripts/debug_stp.sh",
-                "compile"
+                "-c",
+                "mkdir -p build && cd build && cmake .. && make"
             ],
             "group": {
                 "kind": "build",
@@ -92,7 +92,7 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "detail": "编译 STP 项目的测试程序和依赖库"
+            "detail": "使用CMake编译 STP 项目的测试程序和依赖库"
         },
         {
             "label": "编译 SIPUI 项目",

@@ -39,8 +39,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/CMakeScratch/TryCompile-mGGQ3O"
-      binary: "/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/CMakeScratch/TryCompile-mGGQ3O"
+      source: "/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/CMakeScratch/TryCompile-D3k7Ba"
+      binary: "/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/CMakeScratch/TryCompile-D3k7Ba"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -49,13 +49,13 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/CMakeScratch/TryCompile-mGGQ3O'
+        Change Dir: '/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/CMakeScratch/TryCompile-D3k7Ba'
         
-        Run Build Command(s): /opt/rh/gcc-toolset-12/root/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_e7467/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_e7467.dir/build.make CMakeFiles/cmTC_e7467.dir/build
-        gmake[1]: Entering directory '/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/CMakeScratch/TryCompile-mGGQ3O'
-        Building CXX object CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o
-        /opt/rh/gcc-toolset-12/root/usr/bin/c++   -v -o CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o -c /opt/rh/gcc-toolset-12/root/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp
+        Run Build Command(s): /opt/rh/gcc-toolset-12/root/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_7992b/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_7992b.dir/build.make CMakeFiles/cmTC_7992b.dir/build
+        gmake[1]: Entering directory '/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/CMakeScratch/TryCompile-D3k7Ba'
+        Building CXX object CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o
+        /opt/rh/gcc-toolset-12/root/usr/bin/c++   -v -o CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o -c /opt/rh/gcc-toolset-12/root/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp
         Using built-in specs.
         COLLECT_GCC=/opt/rh/gcc-toolset-12/root/usr/bin/c++
         OFFLOAD_TARGET_NAMES=nvptx-none
@@ -65,8 +65,8 @@ events:
         Thread model: posix
         Supported LTO compression algorithms: zlib zstd
         gcc version 12.2.1 20221121 (Red Hat 12.2.1-7) (GCC) 
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_e7467.dir/'
-         /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/cc1plus -quiet -v -D_GNU_SOURCE /opt/rh/gcc-toolset-12/root/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_e7467.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -o /tmp/cct7raup.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_7992b.dir/'
+         /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/cc1plus -quiet -v -D_GNU_SOURCE /opt/rh/gcc-toolset-12/root/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_7992b.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -o /tmp/ccqdvI9E.s
         GNU C++17 (GCC) version 12.2.1 20221121 (Red Hat 12.2.1-7) (x86_64-redhat-linux)
         	compiled by GNU C version 12.2.1 20221121 (Red Hat 12.2.1-7), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.1.0, isl version isl-0.24-GMP
         
@@ -97,15 +97,15 @@ events:
         warning: GMP header version 6.1.2 differs from library version 6.3.0.
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
         Compiler executable checksum: eb2d704c0bf7351e4670621b52ac6c23
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_e7467.dir/'
-         /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/as -v --64 -o CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o /tmp/cct7raup.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_7992b.dir/'
+         /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/as -v --64 -o CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccqdvI9E.s
         GNU assembler version 2.38 (x86_64-redhat-linux) using BFD version version 2.38-17.el8
         COMPILER_PATH=/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/
         LIBRARY_PATH=/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.'
-        Linking CXX executable cmTC_e7467
-        /opt/rh/gcc-toolset-12/root/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e7467.dir/link.txt --verbose=1
-        /opt/rh/gcc-toolset-12/root/usr/bin/c++  -v CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_e7467 
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.'
+        Linking CXX executable cmTC_7992b
+        /opt/rh/gcc-toolset-12/root/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7992b.dir/link.txt --verbose=1
+        /opt/rh/gcc-toolset-12/root/usr/bin/c++  -v CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_7992b 
         Using built-in specs.
         COLLECT_GCC=/opt/rh/gcc-toolset-12/root/usr/bin/c++
         COLLECT_LTO_WRAPPER=/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/lto-wrapper
@@ -118,10 +118,10 @@ events:
         gcc version 12.2.1 20221121 (Red Hat 12.2.1-7) (GCC) 
         COMPILER_PATH=/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/
         LIBRARY_PATH=/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_e7467' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_e7467.'
-         /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/collect2 -plugin /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/liblto_plugin.so -plugin-opt=/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/lto-wrapper -plugin-opt=-fresolution=/tmp/cczbVHq1.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_e7467 /lib/../lib64/crt1.o /lib/../lib64/crti.o /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/crtbegin.o -L/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12 -L/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../.. CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/crtend.o /lib/../lib64/crtn.o
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_e7467' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_e7467.'
-        gmake[1]: Leaving directory '/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/CMakeScratch/TryCompile-mGGQ3O'
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_7992b' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_7992b.'
+         /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/collect2 -plugin /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/liblto_plugin.so -plugin-opt=/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccFJ8n9f.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_7992b /lib/../lib64/crt1.o /lib/../lib64/crti.o /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/crtbegin.o -L/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12 -L/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../.. CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/crtend.o /lib/../lib64/crtn.o
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_7992b' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_7992b.'
+        gmake[1]: Leaving directory '/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/CMakeScratch/TryCompile-D3k7Ba'
         
       exitCode: 0
   -
@@ -163,13 +163,13 @@ events:
     message: |
       Parsed CXX implicit link information:
         link line regex: [^( *|.*[/\\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
-        ignore line: [Change Dir: '/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/CMakeScratch/TryCompile-mGGQ3O']
+        ignore line: [Change Dir: '/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/CMakeScratch/TryCompile-D3k7Ba']
         ignore line: []
-        ignore line: [Run Build Command(s): /opt/rh/gcc-toolset-12/root/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_e7467/fast]
-        ignore line: [/usr/bin/gmake  -f CMakeFiles/cmTC_e7467.dir/build.make CMakeFiles/cmTC_e7467.dir/build]
-        ignore line: [gmake[1]: Entering directory '/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/CMakeScratch/TryCompile-mGGQ3O']
-        ignore line: [Building CXX object CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o]
-        ignore line: [/opt/rh/gcc-toolset-12/root/usr/bin/c++   -v -o CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o -c /opt/rh/gcc-toolset-12/root/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Run Build Command(s): /opt/rh/gcc-toolset-12/root/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_7992b/fast]
+        ignore line: [/usr/bin/gmake  -f CMakeFiles/cmTC_7992b.dir/build.make CMakeFiles/cmTC_7992b.dir/build]
+        ignore line: [gmake[1]: Entering directory '/root/trading_sys/wondertrader/project/stp/build/CMakeFiles/CMakeScratch/TryCompile-D3k7Ba']
+        ignore line: [Building CXX object CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [/opt/rh/gcc-toolset-12/root/usr/bin/c++   -v -o CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o -c /opt/rh/gcc-toolset-12/root/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/opt/rh/gcc-toolset-12/root/usr/bin/c++]
         ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
@@ -179,8 +179,8 @@ events:
         ignore line: [Thread model: posix]
         ignore line: [Supported LTO compression algorithms: zlib zstd]
         ignore line: [gcc version 12.2.1 20221121 (Red Hat 12.2.1-7) (GCC) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_e7467.dir/']
-        ignore line: [ /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/cc1plus -quiet -v -D_GNU_SOURCE /opt/rh/gcc-toolset-12/root/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_e7467.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -o /tmp/cct7raup.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_7992b.dir/']
+        ignore line: [ /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/cc1plus -quiet -v -D_GNU_SOURCE /opt/rh/gcc-toolset-12/root/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_7992b.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -o /tmp/ccqdvI9E.s]
         ignore line: [GNU C++17 (GCC) version 12.2.1 20221121 (Red Hat 12.2.1-7) (x86_64-redhat-linux)]
         ignore line: [	compiled by GNU C version 12.2.1 20221121 (Red Hat 12.2.1-7)  GMP version 6.1.2  MPFR version 3.1.6-p2  MPC version 1.1.0  isl version isl-0.24-GMP]
         ignore line: []
@@ -211,15 +211,15 @@ events:
         ignore line: [warning: GMP header version 6.1.2 differs from library version 6.3.0.]
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
         ignore line: [Compiler executable checksum: eb2d704c0bf7351e4670621b52ac6c23]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_e7467.dir/']
-        ignore line: [ /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/as -v --64 -o CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o /tmp/cct7raup.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_7992b.dir/']
+        ignore line: [ /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/as -v --64 -o CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccqdvI9E.s]
         ignore line: [GNU assembler version 2.38 (x86_64-redhat-linux) using BFD version version 2.38-17.el8]
         ignore line: [COMPILER_PATH=/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/]
         ignore line: [LIBRARY_PATH=/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.']
-        ignore line: [Linking CXX executable cmTC_e7467]
-        ignore line: [/opt/rh/gcc-toolset-12/root/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e7467.dir/link.txt --verbose=1]
-        ignore line: [/opt/rh/gcc-toolset-12/root/usr/bin/c++  -v CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_e7467 ]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.']
+        ignore line: [Linking CXX executable cmTC_7992b]
+        ignore line: [/opt/rh/gcc-toolset-12/root/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7992b.dir/link.txt --verbose=1]
+        ignore line: [/opt/rh/gcc-toolset-12/root/usr/bin/c++  -v CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_7992b ]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/opt/rh/gcc-toolset-12/root/usr/bin/c++]
         ignore line: [COLLECT_LTO_WRAPPER=/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/lto-wrapper]
@@ -232,13 +232,13 @@ events:
         ignore line: [gcc version 12.2.1 20221121 (Red Hat 12.2.1-7) (GCC) ]
         ignore line: [COMPILER_PATH=/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/]
         ignore line: [LIBRARY_PATH=/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_e7467' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_e7467.']
-        link line: [ /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/collect2 -plugin /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/liblto_plugin.so -plugin-opt=/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/lto-wrapper -plugin-opt=-fresolution=/tmp/cczbVHq1.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_e7467 /lib/../lib64/crt1.o /lib/../lib64/crti.o /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/crtbegin.o -L/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12 -L/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../.. CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/crtend.o /lib/../lib64/crtn.o]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_7992b' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_7992b.']
+        link line: [ /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/collect2 -plugin /opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/liblto_plugin.so -plugin-opt=/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccFJ8n9f.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_7992b /lib/../lib64/crt1.o /lib/../lib64/crti.o /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/crtbegin.o -L/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12 -L/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../.. CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/crtend.o /lib/../lib64/crtn.o]
           arg [/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/collect2] ==> ignore
           arg [-plugin] ==> ignore
           arg [/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/liblto_plugin.so] ==> ignore
           arg [-plugin-opt=/opt/rh/gcc-toolset-12/root/usr/libexec/gcc/x86_64-redhat-linux/12/lto-wrapper] ==> ignore
-          arg [-plugin-opt=-fresolution=/tmp/cczbVHq1.res] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/ccFJ8n9f.res] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
           arg [-plugin-opt=-pass-through=-lc] ==> ignore
@@ -253,7 +253,7 @@ events:
           arg [-dynamic-linker] ==> ignore
           arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
           arg [-o] ==> ignore
-          arg [cmTC_e7467] ==> ignore
+          arg [cmTC_7992b] ==> ignore
           arg [/lib/../lib64/crt1.o] ==> obj [/lib/../lib64/crt1.o]
           arg [/lib/../lib64/crti.o] ==> obj [/lib/../lib64/crti.o]
           arg [/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/crtbegin.o] ==> obj [/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/crtbegin.o]
@@ -262,7 +262,7 @@ events:
           arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
           arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
           arg [-L/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../..] ==> dir [/opt/rh/gcc-toolset-12/root/usr/lib/gcc/x86_64-redhat-linux/12/../../..]
-          arg [CMakeFiles/cmTC_e7467.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [CMakeFiles/cmTC_7992b.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
           arg [-lstdc++] ==> lib [stdc++]
           arg [-lm] ==> lib [m]
           arg [-lgcc_s] ==> lib [gcc_s]
