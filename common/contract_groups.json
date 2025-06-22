@@ -1,0 +1,101 @@
+{
+    "test_contracts": {
+        "description": "测试用合约组 - 用于开发和测试环境",
+        "contracts": [
+            "SHFE.cu.HOT",
+            "SHFE.au.HOT", 
+            "DCE.i.HOT",
+            "CZCE.MA.HOT",
+            "CFFEX.IF.HOT"
+        ]
+    },
+    "main_futures": {
+        "description": "主要期货品种 - 交易量大的主力合约",
+        "contracts": [
+            "SHFE.cu.HOT",
+            "SHFE.rb.HOT",
+            "SHFE.au.HOT",
+            "SHFE.ag.HOT",
+            "SHFE.zn.HOT",
+            "DCE.i.HOT",
+            "DCE.j.HOT",
+            "DCE.jm.HOT",
+            "DCE.a.HOT",
+            "DCE.m.HOT",
+            "CZCE.MA.HOT",
+            "CZCE.CF.HOT",
+            "CZCE.SR.HOT",
+            "CZCE.TA.HOT",
+            "CFFEX.IF.HOT",
+            "CFFEX.IC.HOT",
+            "CFFEX.IH.HOT"
+        ]
+    },
+    "stock_index": {
+        "description": "股指期货 - 中金所股指期货品种",
+        "contracts": [
+            "CFFEX.IF.HOT",
+            "CFFEX.IC.HOT",
+            "CFFEX.IH.HOT"
+        ]
+    },
+    "precious_metals": {
+        "description": "贵金属 - 黄金白银等贵金属期货",
+        "contracts": [
+            "SHFE.au.HOT",
+            "SHFE.ag.HOT"
+        ]
+    },
+    "base_metals": {
+        "description": "基础金属 - 铜锌等基础金属期货",
+        "contracts": [
+            "SHFE.cu.HOT",
+            "SHFE.zn.HOT",
+            "SHFE.al.HOT",
+            "SHFE.pb.HOT",
+            "SHFE.ni.HOT"
+        ]
+    },
+    "energy": {
+        "description": "能源化工 - 原油燃油等能源期货",
+        "contracts": [
+            "SHFE.rb.HOT",
+            "SHFE.hc.HOT",
+            "SHFE.fu.HOT",
+            "SHFE.bu.HOT"
+        ]
+    },
+    "agriculture": {
+        "description": "农产品 - 大豆玉米等农产品期货",
+        "contracts": [
+            "DCE.a.HOT",
+            "DCE.m.HOT",
+            "DCE.y.HOT",
+            "DCE.c.HOT",
+            "CZCE.CF.HOT",
+            "CZCE.SR.HOT",
+            "CZCE.MA.HOT",
+            "CZCE.TA.HOT"
+        ]
+    },
+    "black_chain": {
+        "description": "黑色产业链 - 铁矿石焦炭螺纹钢等",
+        "contracts": [
+            "DCE.i.HOT",
+            "DCE.j.HOT",
+            "DCE.jm.HOT",
+            "SHFE.rb.HOT",
+            "SHFE.hc.HOT"
+        ]
+    },
+    "specific_contracts_2024": {
+        "description": "2024年特定合约 - 用于特定时期的测试",
+        "contracts": [
+            "SHFE.cu2412",
+            "SHFE.au2412",
+            "DCE.i2405",
+            "CZCE.MA405",
+            "CFFEX.IF2412"
+        ]
+    }
+}

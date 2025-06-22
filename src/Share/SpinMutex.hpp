@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <atomic>
+#include <thread>
 #ifdef _MSC_VER
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -8,7 +9,7 @@
 class SpinMutex
 {
 private:
-	std::atomic<bool> flag = { false };
+	std::atomic<bool> flag = {false};
 
 public:
 	void lock()
@@ -22,8 +23,12 @@ public:
 			{
 #ifdef _MSC_VER
 				_mm_pause();
-#else
+#elif defined(__x86_64__) || defined(__i386__)
 				__builtin_ia32_pause();
+#elif defined(__aarch64__) || defined(__arm__)
+				__asm__ __volatile__("yield" ::: "memory");
+#else
+				std::this_thread::yield();
 #endif
 			}
 		}
@@ -38,11 +43,11 @@ public:
 class SpinLock
 {
 public:
-	SpinLock(SpinMutex& mtx) :_mutex(mtx) { _mutex.lock(); }
-	SpinLock(const SpinLock&) = delete;
-	SpinLock& operator=(const SpinLock&) = delete;
+	SpinLock(SpinMutex &mtx) : _mutex(mtx) { _mutex.lock(); }
+	SpinLock(const SpinLock &) = delete;
+	SpinLock &operator=(const SpinLock &) = delete;
 	~SpinLock() { _mutex.unlock(); }
 
 private:
-	SpinMutex&	_mutex;
+	SpinMutex &_mutex;
 };
