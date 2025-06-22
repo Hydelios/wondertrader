@@ -18,22 +18,23 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # 包含目录
 include_directories(
-    ../src
-    ../src/Includes
-    ../src/Share
-    ../src/API/stp/include
-    ../3rd/mydeps_gcc8.4.0/mydeps/include
+    ../../src
+    ../../src/Includes
+    ../../src/Share
+    ../../src/API/stp/include
+    ../../3rd/mydeps_gcc8.4.0/mydeps/include
 )
 
 # 链接目录
 link_directories(
-    ../build_all/build_x64/Release/bin
+    .
+    libs
     ../3rd/mydeps_gcc8.4.0/mydeps/lib
 )
 
 # 源文件
 set(SOURCES
-    test_stp_debug.cpp
+    src/test_stp_debug.cpp
 )
 
 # 创建可执行文件
@@ -58,13 +59,13 @@ set_target_properties(test_stp_debug PROPERTIES
 # 添加自定义目标用于复制库文件
 add_custom_target(copy_libs ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ../build_all/build_x64/Release/bin/libTraderSTP.so
+        ../libs/libTraderSTP.so
         ${CMAKE_BINARY_DIR}/
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ../build_all/build_x64/Release/bin/libWTSTools.so
+        ../libWTSTools.a
         ${CMAKE_BINARY_DIR}/
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ../build_all/build_x64/Release/bin/libWTSUtils.so
+        ../libWTSUtils.a
         ${CMAKE_BINARY_DIR}/
     COMMENT "复制必要的动态库文件"
 )

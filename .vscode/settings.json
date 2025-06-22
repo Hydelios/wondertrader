@@ -1,0 +1,52 @@
+{
+    "files.associations": {
+        "*.h": "cpp",
+        "*.cpp": "cpp",
+        "*.yaml": "yaml",
+        "*.yml": "yaml"
+    },
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/src/Includes",
+        "${workspaceFolder}/src/Share",
+        "${workspaceFolder}/project/stp/src",
+        "${workspaceFolder}/project/sipui/src",
+        "${workspaceFolder}/3rd/mydeps_gcc8.4.0/mydeps/include"
+    ],
+    "C_Cpp.default.compilerPath": "/usr/bin/g++",
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
+    "debug.allowBreakpointsEverywhere": true,
+    "debug.showBreakpointsInOverviewRuler": true,
+    "terminal.integrated.cwd": "${workspaceFolder}",
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+        "*.cpp": "${capture}.h",
+        "*.h": "${capture}.cpp"
+    },
+    "search.exclude": {
+        "**/build*/**": true,
+        "**/dist/**": true,
+        "**/.git/**": true,
+        "**/node_modules/**": true
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/build*": true,
+        "**/dist": true
+    },
+    "cmake.configureOnOpen": false,
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "git.ignoreLimitWarning": true,
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#1e3a8a",
+        "activityBar.foreground": "#ffffff",
+        "statusBar.background": "#1e40af",
+        "statusBar.foreground": "#ffffff"
+    },
+    "workbench.tree.indent": 20,
+    "breadcrumbs.enabled": true
+}
