@@ -16,19 +16,19 @@ bool TraderSTP::init(WTSVariant* params)
 
 #### 必需参数
 
-| 参数名 | 类型 | 说明 | 示例值 |
-|--------|------|------|--------|
-| `front` | String/Array | STP前置机地址，支持单个或多个 | `"tcp://127.0.0.1:9999"` |
-| `broker` | String | 券商代码 | `"STP_BROKER"` |
-| `user` | String | 用户名 | `"your_username"` |
-| `pass` | String | 密码 | `"your_password"` |
+| 参数名   | 类型         | 说明                          | 示例值                   |
+| -------- | ------------ | ----------------------------- | ------------------------ |
+| `front`  | String/Array | STP前置机地址，支持单个或多个 | `"tcp://127.0.0.1:9999"` |
+| `broker` | String       | 券商代码                      | `"STP_BROKER"`           |
+| `user`   | String       | 用户名                        | `"your_username"`        |
+| `pass`   | String       | 密码                          | `"your_password"`        |
 
 #### 可选参数
 
-| 参数名 | 类型 | 默认值 | 说明 |
-|--------|------|--------|------|
-| `flowdir` | String | `"STPTDFlow"` | 数据流存储目录 |
-| `stpmodule` | String | `"stptradeapi"` | STP模块名称 |
+| 参数名      | 类型   | 默认值          | 说明           |
+| ----------- | ------ | --------------- | -------------- |
+| `flowdir`   | String | `"STPTDFlow"`   | 数据流存储目录 |
+| `stpmodule` | String | `"stptradeapi"` | STP模块名称    |
 
 ### 2. 类成员变量定义
 
@@ -160,7 +160,7 @@ if (m_strUser.empty()) {
 
 1. **编译项目**
    ```bash
-   cd prj_bin
+   cd project/stp/scripts
    ./debug_stp.sh compile
    ```
 
@@ -179,8 +179,8 @@ if (m_strUser.empty()) {
 - **头文件**: `src/TraderSTP/TraderSTP.h`
 - **实现文件**: `src/TraderSTP/TraderSTP.cpp`
 - **测试文件**: `src/TestTraderSTP/main.cpp`
-- **配置示例**: `prj_bin/stp_config.yaml`
-- **调试程序**: `prj_bin/test_stp_debug.cpp`
+- **配置示例**: `project/stp/config.yaml`
+- **调试程序**: `project/stp/src/test_stp_debug.cpp`
 
 ## ⚠️ 注意事项
 

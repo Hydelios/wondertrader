@@ -71,7 +71,7 @@ compile_project() {
         make -j$(nproc)
     fi
     
-    cd ../../../prj_bin
+    cd "$SIPUI_DIR"
     return 0
 }
 

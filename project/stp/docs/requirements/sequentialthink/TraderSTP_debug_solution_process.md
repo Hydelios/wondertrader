@@ -10,7 +10,7 @@
 
 ### 1. 问题识别阶段
 - **现象**: 编译时报错 "libTraderSTP.so 未找到，请先编译主项目"
-- **根本原因**: 编译后的库文件没有拷贝到调试目录 prj_bin
+- **根本原因**: 编译后的库文件没有拷贝到项目调试目录
 - **用户需求**: 需要一个自动拷贝文件的脚本
 
 ### 2. 环境调查阶段
@@ -22,7 +22,7 @@ find .. -name "libTraderSTP.so" -type f 2>/dev/null
 
 **发现的关键信息**:
 - 库文件确实存在于编译目录中
-- prj_bin 目录为空，需要拷贝文件
+- 项目调试目录为空，需要拷贝文件
 - 用户提到 STP API 库位于: `/root/trading_sys/wondertrader/src/API/stp/lib/release/libSTPTradeApi.so`
 
 ## 解决方案设计
@@ -62,7 +62,7 @@ find .. -name "libTraderSTP.so" -type f 2>/dev/null
 
 ### 步骤1: 创建文件拷贝脚本
 ```bash
-# 创建 copy_files_to_prj_bin.sh
+# 创建 copy_files.sh
 # 包含智能路径检测和验证功能
 ```
 

@@ -67,7 +67,6 @@ check_project_structure() {
     local projects=(
         "project/stp"
         "project/sipui"
-        "prj_bin"
     )
     
     for project in "${projects[@]}"; do
@@ -87,7 +86,6 @@ check_executables() {
     local executables=(
         "project/stp/bin/test_stp_debug"
         "project/sipui/bin/test_parser_zc"
-        "prj_bin/test_stp_debug"
     )
     
     for exe in "${executables[@]}"; do
@@ -154,7 +152,6 @@ check_libraries() {
     local lib_dirs=(
         "project/stp/libs"
         "project/sipui/libs"
-        "prj_bin/libs"
     )
     
     for lib_dir in "${lib_dirs[@]}"; do

@@ -34,14 +34,9 @@
 - **工作目录**: `project/sipui`
 - **自动编译**: 是（使用 `scripts/build_and_test.sh compile`）
 
-### 3. 🔧 调试 TraderSTP (兼容旧版)
-- **程序**: `prj_bin/test_stp_debug`
-- **工作目录**: `prj_bin`
-- **自动编译**: 是（使用传统编译方式）
-
-### 4. 🔧 调试 TestTraderSTP (原版)
+### 3. 🔧 调试 TestTraderSTP (原版)
 - **程序**: `src/build_all/build_x64/Release/bin/TestTraderSTP/TestTraderSTP`
-- **工作目录**: `prj_bin`
+- **工作目录**: `project/stp`
 - **自动编译**: 是（编译整个项目）
 
 ## 🛠️ 编译任务
@@ -50,12 +45,9 @@
 
 1. **编译 STP 项目** - 编译 STP 项目的测试程序和依赖库
 2. **编译 SIPUI 项目** - 编译 SIPUI 项目的中畅解析器测试程序
-3. **编译 TraderSTP 测试程序** - 编译传统的 TraderSTP 测试程序
-4. **编译所有项目** - 编译整个 WonderTrader 项目
-5. **拷贝 STP 项目文件** - 拷贝 STP 项目的库文件和配置文件
-6. **拷贝 SIPUI 项目文件** - 拷贝 SIPUI 项目的库文件和配置文件
-7. **拷贝库文件到 prj_bin** - 拷贝所有必要的库文件到调试目录
-8. **清理 TraderSTP 调试文件** - 清理调试相关的编译文件
+3. **编译所有项目** - 编译整个 WonderTrader 项目
+4. **拷贝 STP 项目文件** - 拷贝 STP 项目的库文件和配置文件
+5. **拷贝 SIPUI 项目文件** - 拷贝 SIPUI 项目的库文件和配置文件
 
 ## 🎯 如何使用
 
@@ -72,7 +64,6 @@ bash scripts/switch_project.sh
 # 直接切换到指定项目
 bash scripts/switch_project.sh stp      # STP 项目
 bash scripts/switch_project.sh sipui    # SIPUI 项目
-bash scripts/switch_project.sh prj_bin  # 传统项目
 bash scripts/switch_project.sh original # 原版项目
 ```
 
@@ -120,9 +111,9 @@ bash scripts/verify_debug_setup.sh
 - **解决**: 重新创建了所有 VSCode 配置文件，确保格式正确
 - **结果**: 所有 JSON 文件现在都可以正确解析
 
-### prj_bin 路径问题
-- **问题**: 配置文件中引用了不存在的 `prj_bin` 目录
-- **解决**: 将所有 `prj_bin` 路径转换为 `project` 结构路径
+### 路径配置问题
+- **问题**: 配置文件中的路径需要统一到 `project` 结构
+- **解决**: 将所有路径转换为基于 `project/` 目录的结构
 - **结果**: 所有调试配置现在都指向正确的项目目录
 
 ## 📚 参考文档

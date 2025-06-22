@@ -60,11 +60,8 @@ show_projects() {
     echo "   - 可执行文件: bin/test_parser_zc"
     echo "   - 配置文件: config/config.yaml"
     echo ""
-    echo "3. 🔧 传统 prj_bin 项目"
-    echo "   - 描述: 兼容旧版的调试环境"
-    echo "   - 可执行文件: test_stp_debug"
-    echo ""
-    echo "4. 🔧 原版 TestTraderSTP"
+
+    echo "3. 🔧 原版 TestTraderSTP"
     echo "   - 描述: WonderTrader 原版测试程序"
     echo "   - 位置: src/build_all/build_x64/Release/bin/TestTraderSTP/"
     echo ""
@@ -95,15 +92,7 @@ switch_to_project() {
             echo "  - bash scripts/copy_files.sh all          # 拷贝文件"
             echo "  - ./bin/test_parser_zc                    # 直接运行"
             ;;
-        3|"prj_bin")
-            print_project "切换到传统 prj_bin 项目"
-            cd "$WONDERTRADER_ROOT/prj_bin"
-            print_success "当前目录: $(pwd)"
-            print_info "可用命令:"
-            echo "  - bash copy_files_to_prj_bin.sh  # 拷贝文件"
-            echo "  - ./test_stp_debug               # 直接运行"
-            ;;
-        4|"original")
+        3|"original")
             print_project "切换到原版 TestTraderSTP"
             cd "$WONDERTRADER_ROOT/src"
             print_success "当前目录: $(pwd)"
@@ -132,10 +121,7 @@ show_vscode_info() {
     echo "   - 自动编译并调试 project/sipui/bin/test_parser_zc"
     echo "   - 工作目录: project/sipui"
     echo ""
-    echo "🔧 调试 TraderSTP (兼容旧版)"
-    echo "   - 调试 prj_bin/test_stp_debug"
-    echo "   - 工作目录: prj_bin"
-    echo ""
+
     echo "🔧 调试 TestTraderSTP (原版)"
     echo "   - 调试原版 WonderTrader 测试程序"
     echo ""
@@ -148,7 +134,7 @@ main() {
         show_projects
         show_vscode_info
         echo ""
-        echo -n "请选择项目 (1-4) 或输入项目名称: "
+        echo -n "请选择项目 (1-3) 或输入项目名称: "
         read choice
         switch_to_project "$choice"
     else
@@ -163,14 +149,13 @@ show_help() {
     echo "项目选择:"
     echo "  1, stp       切换到 STP 项目"
     echo "  2, sipui     切换到 SIPUI 项目"
-    echo "  3, prj_bin   切换到传统 prj_bin 项目"
-    echo "  4, original  切换到原版 TestTraderSTP"
+    echo "  3, original  切换到原版 TestTraderSTP"
     echo "  help         显示此帮助信息"
     echo ""
     echo "示例:"
     echo "  $0           # 交互式选择"
     echo "  $0 stp       # 直接切换到 STP 项目"
-    echo "  $0 2         # 切换到 SIPUI 项目"
+    echo "  $0 3         # 切换到原版 TestTraderSTP"
 }
 
 # 处理命令行参数

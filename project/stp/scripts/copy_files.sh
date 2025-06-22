@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 文件拷贝脚本 - 将编译后的文件拷贝到 prj_bin 目录
+# 文件拷贝脚本 - 将编译后的文件拷贝到项目目录
 # 作者: Hydelios
 # 日期: 2025-06-17
 
 echo "=========================================="
-echo "    文件拷贝到 prj_bin 脚本"
+echo "    文件拷贝脚本"
 echo "=========================================="
 
 # 设置颜色输出
@@ -38,107 +38,156 @@ STP_DIR="$(dirname "$SCRIPT_DIR")"
 PROJECT_ROOT="$(dirname "$STP_DIR")"
 WONDERTRADER_ROOT="$(dirname "$PROJECT_ROOT")"
 LIBS_DIR="$STP_DIR/libs"
+BIN_DIR="$STP_DIR/bin"
+BUILD_DIR="$STP_DIR/build"
+
+# 定义项目目录变量
+PROJECT_BIN_DIR="$STP_DIR"
 
 print_info "WonderTrader 根目录: $WONDERTRADER_ROOT"
 print_info "项目根目录: $PROJECT_ROOT"
 print_info "STP 目录: $STP_DIR"
 print_info "库文件目录: $LIBS_DIR"
+print_info "可执行文件目录: $BIN_DIR"
+print_info "构建目录: $BUILD_DIR"
 
-# 创建 libs 目录
+# 创建必要的目录
 mkdir -p "$LIBS_DIR"
+mkdir -p "$BIN_DIR"
 
-# 定义源目录路径
-RELEASE_BIN_DIR="$WONDERTRADER_ROOT/src/build_all/build_x64/Release/bin"
-DEBUG_BIN_DIR="$WONDERTRADER_ROOT/src/build_debug/build_x64/Debug/bin"
+# 定义源目录路径（按优先级排序）
+POSSIBLE_BIN_DIRS=(
+    "$BUILD_DIR"                                                    # 本地构建目录
+    "$WONDERTRADER_ROOT/src/build_all/build_x64/Release/bin"       # 全局Release构建
+    "$WONDERTRADER_ROOT/src/build_debug/build_x64/Debug/bin"       # 全局Debug构建
+    "$WONDERTRADER_ROOT/build/bin"                                 # 其他可能的构建目录
+)
 DIST_DIR="$WONDERTRADER_ROOT/dist"
 
 # 拷贝动态库文件
 copy_libraries() {
     print_info "拷贝动态库文件..."
 
-    # 优先使用 Release 版本，如果不存在则使用 Debug 版本
-    if [ -d "$RELEASE_BIN_DIR" ]; then
-        SOURCE_DIR="$RELEASE_BIN_DIR"
-        print_info "使用 Release 版本库文件"
-    elif [ -d "$DEBUG_BIN_DIR" ]; then
-        SOURCE_DIR="$DEBUG_BIN_DIR"
-        print_warning "使用 Debug 版本库文件"
-    else
-        print_error "未找到编译后的库文件目录"
+    # 查找可用的源目录
+    SOURCE_DIR=""
+    for dir in "${POSSIBLE_BIN_DIRS[@]}"; do
+        if [ -d "$dir" ] && [ "$(ls -A "$dir"/*.so 2>/dev/null)" ]; then
+            SOURCE_DIR="$dir"
+            print_info "使用库文件目录: $SOURCE_DIR"
+            break
+        fi
+    done
+
+    if [ -z "$SOURCE_DIR" ]; then
+        print_error "未找到包含库文件的目录"
+        print_info "尝试的目录："
+        for dir in "${POSSIBLE_BIN_DIRS[@]}"; do
+            print_info "  - $dir"
+        done
         return 1
     fi
 
     # 拷贝所有 .so 文件到 libs 目录
-    if [ -d "$SOURCE_DIR" ]; then
-        print_info "从 $SOURCE_DIR 拷贝库文件到 libs 目录..."
-        cp "$SOURCE_DIR"/*.so "$LIBS_DIR/" 2>/dev/null
+    print_info "从 $SOURCE_DIR 拷贝库文件到 libs 目录..."
+    local copied_count=0
 
-        # 为主要库文件在 STP 目录创建符号链接
-        local key_libs=("libTraderSTP.so")
-        for lib in "${key_libs[@]}"; do
-            if [ -f "$LIBS_DIR/$lib" ]; then
-                cd "$STP_DIR"
-                ln -sf "libs/$lib" "$lib"
-                print_success "✓ $lib (符号链接)"
-            else
-                print_warning "✗ $lib 未找到"
-            fi
-        done
+    # 拷贝 .so 文件
+    for lib_file in "$SOURCE_DIR"/*.so; do
+        if [ -f "$lib_file" ]; then
+            cp "$lib_file" "$LIBS_DIR/"
+            local lib_name=$(basename "$lib_file")
+            print_success "✓ $lib_name"
+            ((copied_count++))
+        fi
+    done
 
-        # 检查其他库文件
-        local other_libs=("libWTSTools.so" "libWTSUtils.so")
-        for lib in "${other_libs[@]}"; do
-            if [ -f "$LIBS_DIR/$lib" ]; then
-                print_success "✓ $lib (在 libs 目录)"
-            else
-                print_warning "✗ $lib 未找到"
-            fi
-        done
-    fi
+    # 拷贝 .a 文件（静态库）
+    for lib_file in "$SOURCE_DIR"/*.a; do
+        if [ -f "$lib_file" ]; then
+            cp "$lib_file" "$STP_DIR/"
+            local lib_name=$(basename "$lib_file")
+            print_success "✓ $lib_name (静态库)"
+            ((copied_count++))
+        fi
+    done
+
+    # 为主要库文件在 STP 目录创建符号链接
+    local key_libs=("libTraderSTP.so")
+    for lib in "${key_libs[@]}"; do
+        if [ -f "$LIBS_DIR/$lib" ]; then
+            cd "$STP_DIR"
+            ln -sf "libs/$lib" "$lib"
+            print_success "✓ $lib (符号链接)"
+        elif [ -f "$STP_DIR/$lib" ]; then
+            print_success "✓ $lib (已存在)"
+        else
+            print_warning "✗ $lib 未找到"
+        fi
+    done
+
+    print_info "共拷贝 $copied_count 个库文件"
 }
 
 # 拷贝可执行文件
 copy_executables() {
     print_info "拷贝可执行文件..."
-    
+
     # 拷贝 TestTraderSTP
     local test_exe_paths=(
-        "$RELEASE_BIN_DIR/TestTraderSTP/TestTraderSTP"
-        "$DEBUG_BIN_DIR/TestTraderSTP/TestTraderSTP"
-        "$PROJECT_ROOT/src/build_all/build_x64/Release/bin/TestTraderSTP"
-        "$PROJECT_ROOT/src/build_debug/build_x64/Debug/bin/TestTraderSTP"
+        "$BUILD_DIR/test_stp_debug"                                     # 本地构建的测试程序
+        "$WONDERTRADER_ROOT/src/build_all/build_x64/Release/bin/TestTraderSTP/TestTraderSTP"
+        "$WONDERTRADER_ROOT/src/build_debug/build_x64/Debug/bin/TestTraderSTP/TestTraderSTP"
+        "$WONDERTRADER_ROOT/src/TestTraderSTP/TestTraderSTP"
     )
-    
+
+    local copied_exe=false
     for exe_path in "${test_exe_paths[@]}"; do
         if [ -f "$exe_path" ]; then
-            cp "$exe_path" "$PRJ_BIN_DIR/TestTraderSTP_original"
-            print_success "✓ TestTraderSTP 拷贝完成"
-            break
+            local exe_name=$(basename "$exe_path")
+            if [[ "$exe_name" == "TestTraderSTP" ]]; then
+                cp "$exe_path" "$STP_DIR/TestTraderSTP_original"
+                print_success "✓ TestTraderSTP -> TestTraderSTP_original"
+            else
+                cp "$exe_path" "$BIN_DIR/"
+                print_success "✓ $exe_name -> bin/"
+            fi
+            copied_exe=true
         fi
     done
+
+    if [ "$copied_exe" = false ]; then
+        print_warning "未找到可执行文件，可能需要先编译项目"
+    fi
 }
 
 # 拷贝配置文件
 copy_configs() {
     print_info "拷贝配置文件..."
-    
-    # 如果 dist 目录存在且 prj_bin 中没有配置文件，则拷贝
-    if [ -d "$DIST_DIR" ] && [ ! -f "$PRJ_BIN_DIR/config.yaml" ]; then
-        print_info "拷贝 dist 目录配置文件..."
-        
+
+    # 检查是否已有配置文件
+    if [ -f "$STP_DIR/config.yaml" ]; then
+        print_info "配置文件已存在，跳过拷贝"
+        return 0
+    fi
+
+    # 如果 dist 目录存在，则拷贝配置文件
+    if [ -d "$DIST_DIR" ]; then
+        print_info "从 dist 目录拷贝配置文件..."
+
         # 拷贝 WtRunnerCta 的配置作为参考
         if [ -d "$DIST_DIR/WtRunnerCta" ]; then
-            cp "$DIST_DIR/WtRunnerCta"/*.yaml "$PRJ_BIN_DIR/" 2>/dev/null
+            cp "$DIST_DIR/WtRunnerCta"/*.yaml "$STP_DIR/" 2>/dev/null
             print_success "✓ 配置文件拷贝完成"
         fi
-        
-        # 拷贝 common 目录
-        if [ -d "$DIST_DIR/common" ]; then
-            cp -r "$DIST_DIR/common" "$PRJ_BIN_DIR/" 2>/dev/null
+
+        # 拷贝 common 目录到项目根目录
+        if [ -d "$DIST_DIR/common" ] && [ ! -d "$PROJECT_ROOT/common" ]; then
+            cp -r "$DIST_DIR/common" "$PROJECT_ROOT/" 2>/dev/null
             print_success "✓ common 目录拷贝完成"
         fi
     else
-        print_info "配置文件已存在，跳过拷贝"
+        print_warning "dist 目录不存在: $DIST_DIR"
+        print_info "配置文件需要手动创建或从其他地方拷贝"
     fi
 }
 
@@ -146,13 +195,28 @@ copy_configs() {
 copy_third_party() {
     print_info "检查第三方依赖..."
 
-    local deps_dir="$WONDERTRADER_ROOT/3rd/mydeps_gcc8.4.0/mydeps/lib"
-    if [ -d "$deps_dir" ]; then
-        print_info "拷贝第三方依赖库到 libs 目录..."
-        cp "$deps_dir"/*.so* "$LIBS_DIR/" 2>/dev/null || true
+    # 可能的第三方依赖目录
+    local deps_dirs=(
+        "$WONDERTRADER_ROOT/3rd/mydeps_gcc8.4.0/mydeps/lib"
+        "$WONDERTRADER_ROOT/3rd/lib"
+        "$WONDERTRADER_ROOT/deps/lib"
+        "/usr/local/lib"
+    )
+
+    local found_deps=false
+    for deps_dir in "${deps_dirs[@]}"; do
+        if [ -d "$deps_dir" ] && [ "$(ls -A "$deps_dir"/*.so* 2>/dev/null)" ]; then
+            print_info "从 $deps_dir 拷贝第三方依赖库..."
+            cp "$deps_dir"/*.so* "$LIBS_DIR/" 2>/dev/null || true
+            found_deps=true
+            break
+        fi
+    done
+
+    if [ "$found_deps" = true ]; then
         print_success "✓ 第三方依赖拷贝完成"
     else
-        print_warning "第三方依赖目录不存在: $deps_dir"
+        print_warning "未找到第三方依赖目录，可能需要手动安装依赖"
     fi
 }
 
@@ -160,16 +224,38 @@ copy_third_party() {
 copy_stp_api() {
     print_info "拷贝 STP API 库..."
 
-    local stp_lib="$WONDERTRADER_ROOT/src/API/stp/lib/release/libSTPTradeApi.so"
-    if [ -f "$stp_lib" ]; then
-        cp "$stp_lib" "$LIBS_DIR/"
-        # 创建符号链接，因为 TraderSTP 期望的文件名是 stptradeapi.so
-        cd "$STP_DIR"
-        ln -sf libs/libSTPTradeApi.so stptradeapi.so
-        print_success "✓ libSTPTradeApi.so 拷贝到 libs 目录"
-        print_success "✓ 创建符号链接 stptradeapi.so"
-    else
-        print_warning "STP API 库不存在: $stp_lib"
+    # 可能的 STP API 库路径
+    local stp_lib_paths=(
+        "$WONDERTRADER_ROOT/src/API/stp/lib/release/libSTPTradeApi.so"
+        "$WONDERTRADER_ROOT/src/API/stp/lib/libSTPTradeApi.so"
+        "$WONDERTRADER_ROOT/libs/libSTPTradeApi.so"
+        "$LIBS_DIR/libSTPTradeApi.so"  # 可能已经存在
+    )
+
+    local found_stp_lib=false
+    for stp_lib in "${stp_lib_paths[@]}"; do
+        if [ -f "$stp_lib" ]; then
+            if [[ "$stp_lib" != "$LIBS_DIR/libSTPTradeApi.so" ]]; then
+                cp "$stp_lib" "$LIBS_DIR/"
+                print_success "✓ libSTPTradeApi.so 拷贝到 libs 目录"
+            else
+                print_success "✓ libSTPTradeApi.so 已存在于 libs 目录"
+            fi
+
+            # 创建符号链接，因为 TraderSTP 期望的文件名是 stptradeapi.so
+            cd "$STP_DIR"
+            ln -sf libs/libSTPTradeApi.so stptradeapi.so
+            print_success "✓ 创建符号链接 stptradeapi.so"
+            found_stp_lib=true
+            break
+        fi
+    done
+
+    if [ "$found_stp_lib" = false ]; then
+        print_warning "STP API 库未找到，请检查以下路径："
+        for path in "${stp_lib_paths[@]}"; do
+            print_warning "  - $path"
+        done
     fi
 }
 
@@ -224,9 +310,9 @@ set_permissions() {
     print_info "设置文件权限..."
     
     # 设置可执行文件权限
-    chmod +x "$PRJ_BIN_DIR"/*.sh 2>/dev/null || true
-    chmod +x "$PRJ_BIN_DIR"/TestTraderSTP* 2>/dev/null || true
-    chmod +x "$PRJ_BIN_DIR"/test_stp_debug 2>/dev/null || true
+    chmod +x "$PROJECT_BIN_DIR"/*.sh 2>/dev/null || true
+    chmod +x "$PROJECT_BIN_DIR"/TestTraderSTP* 2>/dev/null || true
+    chmod +x "$PROJECT_BIN_DIR"/test_stp_debug 2>/dev/null || true
     
     print_success "✓ 权限设置完成"
 }
@@ -244,7 +330,7 @@ verify_copy() {
 
     print_info "检查关键库文件..."
     for lib in "${key_libs[@]}"; do
-        if [ -f "$PRJ_BIN_DIR/$lib" ] || [ -f "$LIBS_DIR/$lib" ]; then
+        if [ -f "$PROJECT_BIN_DIR/$lib" ] || [ -f "$LIBS_DIR/$lib" ]; then
             print_success "✓ $lib 存在"
         else
             print_error "✗ $lib 缺失"
@@ -254,7 +340,7 @@ verify_copy() {
 
     print_info "检查可选库文件..."
     for lib in "${optional_libs[@]}"; do
-        if [ -f "$PRJ_BIN_DIR/$lib" ] || [ -f "$LIBS_DIR/$lib" ]; then
+        if [ -f "$PROJECT_BIN_DIR/$lib" ] || [ -f "$LIBS_DIR/$lib" ]; then
             print_success "✓ $lib 存在"
         else
             print_warning "⚠ $lib 缺失 (可能是静态库)"
@@ -280,8 +366,8 @@ verify_copy() {
     
     # 检查库文件依赖
     local trader_lib=""
-    if [ -f "$PRJ_BIN_DIR/libTraderSTP.so" ]; then
-        trader_lib="$PRJ_BIN_DIR/libTraderSTP.so"
+    if [ -f "$PROJECT_BIN_DIR/libTraderSTP.so" ]; then
+        trader_lib="$PROJECT_BIN_DIR/libTraderSTP.so"
     elif [ -f "$LIBS_DIR/libTraderSTP.so" ]; then
         trader_lib="$LIBS_DIR/libTraderSTP.so"
     fi
@@ -313,7 +399,7 @@ show_help() {
     echo "  stp         仅拷贝 STP API 库"
     echo "  stp-deps    仅拷贝 STP 依赖库"
     echo "  verify      验证已拷贝的文件"
-    echo "  clean       清理 prj_bin 目录"
+    echo "  clean       清理项目目录"
     echo "  help        显示此帮助信息"
     echo ""
     echo "示例:"
@@ -324,13 +410,13 @@ show_help() {
 
 # 清理目录
 clean_directory() {
-    print_warning "清理 prj_bin 目录..."
-    read -p "确定要清理 prj_bin 目录吗？(y/N): " confirm
+    print_warning "清理项目目录..."
+    read -p "确定要清理项目目录吗？(y/N): " confirm
     if [[ $confirm =~ ^[Yy]$ ]]; then
-        rm -f "$PRJ_BIN_DIR"/*.so
-        rm -f "$PRJ_BIN_DIR"/TestTraderSTP*
-        rm -f "$PRJ_BIN_DIR"/test_stp_debug
-        rm -rf "$PRJ_BIN_DIR"/common
+        rm -f "$PROJECT_BIN_DIR"/*.so
+        rm -f "$PROJECT_BIN_DIR"/TestTraderSTP*
+        rm -f "$PROJECT_BIN_DIR"/test_stp_debug
+        rm -rf "$PROJECT_BIN_DIR"/common
         rm -rf "$LIBS_DIR"
         print_success "清理完成"
     else

@@ -1,89 +1,56 @@
-# VSCode 调试 TraderSTP 说明
+# WonderTrader VSCode 调试快速指南
 
-## 🎯 问题解决
+> 📖 **完整文档**：请参考 [`docs/VSCode_Debug_Setup.md`](docs/VSCode_Debug_Setup.md) 获取详细的调试配置指南
 
-你遇到的问题是因为 VSCode 打开的是整个 `wondertrader` 项目文件夹，而不是 `prj_bin` 文件夹。
+## 🚀 快速开始（30秒上手）
 
-## ✅ 已解决方案
+### 1. 一键调试
+1. **确保 VSCode 打开的是 `wondertrader` 根目录**
+2. **直接按 `F5`**
+3. **选择调试配置**：
+   - `� 调试 STP 项目` - STP功能开发（推荐新手）
+   - `🚀 调试 SIPUI 项目` - 中畅行情解析器
 
-我已经在 **wondertrader 根目录** 创建了完整的 VSCode 配置：
+### 2. 程序会自动编译并启动调试！
 
-- `/root/trading_sys/wondertrader/.vscode/launch.json` - 调试配置
-- `/root/trading_sys/wondertrader/.vscode/tasks.json` - 编译任务
+## 📋 可用调试配置
 
-## 🚀 现在可以直接使用
+| 配置名称          | 用途        | 工作目录        | 适用场景              |
+| ----------------- | ----------- | --------------- | --------------------- |
+| 调试 STP 项目     | STP项目开发 | `project/stp`   | STP功能开发、新手入门 |
+| 🚀 调试 SIPUI 项目 | 中畅解析器  | `project/sipui` | 行情解析开发          |
 
-### 方法1：按 F5 调试（推荐）
+## ⚡ 常用快捷键
 
-1. 确保 VSCode 打开的是 `wondertrader` 文件夹
-2. 直接按 `F5` 
-3. 选择 "调试 TraderSTP" 配置
-4. 程序会自动编译并启动调试
+- `F5` - 开始调试/继续执行
+- `F10` - 单步跳过
+- `F11` - 单步进入
+- `Shift+F5` - 停止调试
+- `Ctrl+Shift+P` → "Tasks: Run Task" - 手动编译
 
-### 方法2：手动编译后调试
+## 🔧 环境准备（首次使用）
 
-1. 按 `Ctrl+Shift+P` 打开命令面板
-2. 输入 "Tasks: Run Task"
-3. 选择 "编译 TraderSTP 测试程序"
-4. 编译完成后按 `F5` 调试
+### 对于项目调试：
+```bash
+# STP 项目
+cd project/stp/scripts && ./copy_files.sh all
 
-## 📋 可用的调试配置
+# SIPUI 项目
+cd project/sipui && bash scripts/build.sh
+```
 
-在调试面板中，你可以选择：
+## 🐛 遇到问题？
 
-1. **调试 TraderSTP** - 调试我们创建的测试程序
-2. **调试 TestTraderSTP (原版)** - 调试原始的测试程序
+### 常见问题快速解决：
 
-## 📋 可用的编译任务
+1. **找不到库文件**：运行 `cd project/stp/scripts && ./copy_files.sh all`
+2. **编译失败**：手动运行 `./debug_stp.sh compile`
+3. **调试器无法启动**：确保安装了 GDB (`sudo apt install gdb`)
+4. **配置文件找不到**：检查工作目录是否正确
 
-按 `Ctrl+Shift+P` → "Tasks: Run Task" 可以选择：
+### 需要详细帮助？
+👉 查看完整文档：[`docs/VSCode_Debug_Setup.md`](docs/VSCode_Debug_Setup.md)
 
-1. **编译 TraderSTP 测试程序** - 编译调试测试程序
-2. **编译所有项目** - 编译整个 WonderTrader 项目
-3. **拷贝库文件到 prj_bin** - 拷贝所有必要的库文件
-4. **清理 TraderSTP 调试文件** - 清理编译文件
+---
 
-## 🔧 调试设置
-
-调试配置已经自动设置了：
-
-- **工作目录**: `${workspaceFolder}/prj_bin`
-- **库路径**: 包含 `prj_bin/libs` 目录
-- **断点**: 可以在 TraderSTP 相关代码中设置
-- **预编译任务**: 自动编译测试程序
-
-## 🎯 推荐调试流程
-
-1. **设置断点**：
-   - 在 `src/TraderSTP/TraderSTP.cpp` 的 `init()` 函数设置断点
-   - 在 `prj_bin/test_stp_debug.cpp` 的关键位置设置断点
-
-2. **启动调试**：
-   - 按 `F5` 启动调试
-   - 程序会自动停在断点处
-
-3. **调试操作**：
-   - `F10` - 单步跳过
-   - `F11` - 单步进入
-   - `F5` - 继续执行
-   - 查看变量值、调用栈等
-
-## ⚠️ 注意事项
-
-1. **确保库文件已拷贝**：
-   ```bash
-   cd prj_bin
-   ./copy_files_to_prj_bin.sh
-   ```
-
-2. **如果编译失败**，手动编译一次：
-   ```bash
-   cd prj_bin
-   ./debug_stp.sh compile
-   ```
-
-3. **如果还有问题**，可以查看终端输出的错误信息
-
-## 🎉 现在就试试吧！
-
-直接按 `F5`，应该就能正常调试了！
+**💡 提示**：第一次使用建议选择 `🚀 调试 STP 项目`，这是推荐的调试环境！

@@ -1,0 +1,89 @@
+#基础配置文件
+basefiles:
+    commodity: ../common/commodities.json   #品种列表
+    contract: ../common/contracts.json      #合约列表
+    holiday: ../common/holidays.json        #节假日列表
+    hot: ../common/hots.json                #主力合约映射表
+    session: ../common/sessions.json        #交易时间模板
+
+#数据存储
+data:
+    store:
+        path: ../ZC_Data/      #中畅数据存储根目录
+
+#环境配置
+env:
+    name: cta               #引擎名称：cta/hft/sel
+    product:
+        session: TRADING    #驱动交易时间模板
+
+# 中畅行情解析器配置
+parsers:
+- active: true
+  id: zc_parser
+  module: ParserZC
+  
+  # 连接配置
+  host: "60.12.4.70"
+  port: 30002
+  user: "your_username"
+  pass: "your_password"
+  mode: 0  # 0-TCP普通模式, 1-TCP LNK模式, 2-PGM组播模式, 3-MCB组播模式
+  
+  # 合约订阅配置 - 方法1: 直接指定合约列表
+  codes:
+  - "SHFE.cu2412"              # 沪铜2412
+  - "SHFE.au2412"              # 沪金2412
+  - "DCE.i2405"                # 铁矿石2405
+  - "CZCE.MA405"               # 甲醇405
+  - "CFFEX.IF2412"             # 沪深300股指期货2412
+  
+  # 合约订阅配置 - 方法2: 使用合约组（可选，与codes二选一）
+  contract_groups:
+    enabled: false             # 是否启用合约组模式
+    groups:
+    - "test_contracts"         # 测试合约组
+    - "main_futures"           # 主要期货品种
+    config_file: "../../common/contract_groups.json"  # 合约组配置文件路径
+  
+  # 订阅选项
+  subscription:
+    auto_subscribe: true       # 是否自动订阅
+    subscribe_all_fields: true # 是否订阅所有字段
+    fields:                    # 指定订阅字段（当subscribe_all_fields为false时使用）
+    - "last"                   # 最新价
+    - "bid1"                   # 买一价
+    - "ask1"                   # 卖一价
+    - "volume"                 # 成交量
+    
+  # 重连配置
+  reconnect:
+    enabled: true              # 是否启用自动重连
+    interval: 5                # 重连间隔（秒）
+    max_attempts: 10           # 最大重连次数
+    
+  # 日志配置
+  logging:
+    level: "info"              # 日志级别: debug, info, warn, error
+    enable_tick_log: false     # 是否记录tick数据日志
+    log_interval: 100          # 每N条tick打印一次统计信息
+
+# 配置参数说明：
+# 1. host和port: 中畅行情服务器的IP地址和端口，需要根据实际情况配置
+# 2. user和pass: 中畅提供的用户凭证
+# 3. mode说明:
+#    - 0 (LOGIN_NR): TCP普通模式，适合一般客户端
+#    - 1 (LOGIN_LNK): TCP LNK模式，适合VIP客户端
+#    - 2 (LOGIN_PGM): PGM组播模式，仅支持Windows
+#    - 3 (LOGIN_MCB): MCB组播模式，双通道模式
+# 4. codes: 支持股票和期货的标准WonderTrader格式代码
+#    - 股票格式: 代码.交易所 (如: 600000.SSE, 000001.SZSE)
+#    - 期货格式: 合约.交易所 (如: cu2412.SHFE, IF2412.CFFEX)
+# 5. contract_groups: 合约组配置，支持从外部文件读取合约组定义
+#    - 可以定义多个合约组，如测试组、生产组等
+#    - 便于批量管理和环境切换
+
+# 环境切换示例：
+# 开发环境: 使用 test_contracts 组
+# 测试环境: 使用 main_futures 组  
+# 生产环境: 使用具体的合约列表

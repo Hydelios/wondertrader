@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 文件拷贝脚本 - 将编译后的文件拷贝到 prj_bin 目录
+# 文件拷贝脚本 - 将编译后的文件拷贝到项目目录
 # 作者: Hydelios
 # 日期: 2025-06-17
 
 echo "=========================================="
-echo "    文件拷贝到 prj_bin 脚本"
+echo "    文件拷贝脚本"
 echo "=========================================="
 
 # 设置颜色输出
@@ -38,6 +38,9 @@ STP_DIR="$(dirname "$SCRIPT_DIR")"
 PROJECT_ROOT="$(dirname "$STP_DIR")"
 WONDERTRADER_ROOT="$(dirname "$PROJECT_ROOT")"
 LIBS_DIR="$STP_DIR/libs"
+
+# 定义项目目录变量
+PROJECT_BIN_DIR="$STP_DIR"
 
 print_info "WonderTrader 根目录: $WONDERTRADER_ROOT"
 print_info "项目根目录: $PROJECT_ROOT"
@@ -111,7 +114,7 @@ copy_executables() {
     
     for exe_path in "${test_exe_paths[@]}"; do
         if [ -f "$exe_path" ]; then
-            cp "$exe_path" "$PRJ_BIN_DIR/TestTraderSTP_original"
+            cp "$exe_path" "$PROJECT_BIN_DIR/TestTraderSTP_original"
             print_success "✓ TestTraderSTP 拷贝完成"
             break
         fi
@@ -122,19 +125,19 @@ copy_executables() {
 copy_configs() {
     print_info "拷贝配置文件..."
     
-    # 如果 dist 目录存在且 prj_bin 中没有配置文件，则拷贝
-    if [ -d "$DIST_DIR" ] && [ ! -f "$PRJ_BIN_DIR/config.yaml" ]; then
+    # 如果 dist 目录存在且项目中没有配置文件，则拷贝
+    if [ -d "$DIST_DIR" ] && [ ! -f "$PROJECT_BIN_DIR/config.yaml" ]; then
         print_info "拷贝 dist 目录配置文件..."
-        
+
         # 拷贝 WtRunnerCta 的配置作为参考
         if [ -d "$DIST_DIR/WtRunnerCta" ]; then
-            cp "$DIST_DIR/WtRunnerCta"/*.yaml "$PRJ_BIN_DIR/" 2>/dev/null
+            cp "$DIST_DIR/WtRunnerCta"/*.yaml "$PROJECT_BIN_DIR/" 2>/dev/null
             print_success "✓ 配置文件拷贝完成"
         fi
-        
+
         # 拷贝 common 目录
         if [ -d "$DIST_DIR/common" ]; then
-            cp -r "$DIST_DIR/common" "$PRJ_BIN_DIR/" 2>/dev/null
+            cp -r "$DIST_DIR/common" "$PROJECT_BIN_DIR/" 2>/dev/null
             print_success "✓ common 目录拷贝完成"
         fi
     else
@@ -224,9 +227,9 @@ set_permissions() {
     print_info "设置文件权限..."
     
     # 设置可执行文件权限
-    chmod +x "$PRJ_BIN_DIR"/*.sh 2>/dev/null || true
-    chmod +x "$PRJ_BIN_DIR"/TestTraderSTP* 2>/dev/null || true
-    chmod +x "$PRJ_BIN_DIR"/test_stp_debug 2>/dev/null || true
+    chmod +x "$PROJECT_BIN_DIR"/*.sh 2>/dev/null || true
+    chmod +x "$PROJECT_BIN_DIR"/TestTraderSTP* 2>/dev/null || true
+    chmod +x "$PROJECT_BIN_DIR"/test_stp_debug 2>/dev/null || true
     
     print_success "✓ 权限设置完成"
 }
@@ -244,7 +247,7 @@ verify_copy() {
 
     print_info "检查关键库文件..."
     for lib in "${key_libs[@]}"; do
-        if [ -f "$PRJ_BIN_DIR/$lib" ] || [ -f "$LIBS_DIR/$lib" ]; then
+        if [ -f "$PROJECT_BIN_DIR/$lib" ] || [ -f "$LIBS_DIR/$lib" ]; then
             print_success "✓ $lib 存在"
         else
             print_error "✗ $lib 缺失"
@@ -254,7 +257,7 @@ verify_copy() {
 
     print_info "检查可选库文件..."
     for lib in "${optional_libs[@]}"; do
-        if [ -f "$PRJ_BIN_DIR/$lib" ] || [ -f "$LIBS_DIR/$lib" ]; then
+        if [ -f "$PROJECT_BIN_DIR/$lib" ] || [ -f "$LIBS_DIR/$lib" ]; then
             print_success "✓ $lib 存在"
         else
             print_warning "⚠ $lib 缺失 (可能是静态库)"
@@ -280,8 +283,8 @@ verify_copy() {
     
     # 检查库文件依赖
     local trader_lib=""
-    if [ -f "$PRJ_BIN_DIR/libTraderSTP.so" ]; then
-        trader_lib="$PRJ_BIN_DIR/libTraderSTP.so"
+    if [ -f "$PROJECT_BIN_DIR/libTraderSTP.so" ]; then
+        trader_lib="$PROJECT_BIN_DIR/libTraderSTP.so"
     elif [ -f "$LIBS_DIR/libTraderSTP.so" ]; then
         trader_lib="$LIBS_DIR/libTraderSTP.so"
     fi
@@ -313,7 +316,7 @@ show_help() {
     echo "  stp         仅拷贝 STP API 库"
     echo "  stp-deps    仅拷贝 STP 依赖库"
     echo "  verify      验证已拷贝的文件"
-    echo "  clean       清理 prj_bin 目录"
+    echo "  clean       清理项目目录"
     echo "  help        显示此帮助信息"
     echo ""
     echo "示例:"
@@ -324,13 +327,13 @@ show_help() {
 
 # 清理目录
 clean_directory() {
-    print_warning "清理 prj_bin 目录..."
-    read -p "确定要清理 prj_bin 目录吗？(y/N): " confirm
+    print_warning "清理项目目录..."
+    read -p "确定要清理项目目录吗？(y/N): " confirm
     if [[ $confirm =~ ^[Yy]$ ]]; then
-        rm -f "$PRJ_BIN_DIR"/*.so
-        rm -f "$PRJ_BIN_DIR"/TestTraderSTP*
-        rm -f "$PRJ_BIN_DIR"/test_stp_debug
-        rm -rf "$PRJ_BIN_DIR"/common
+        rm -f "$PROJECT_BIN_DIR"/*.so
+        rm -f "$PROJECT_BIN_DIR"/TestTraderSTP*
+        rm -f "$PROJECT_BIN_DIR"/test_stp_debug
+        rm -rf "$PROJECT_BIN_DIR"/common
         rm -rf "$LIBS_DIR"
         print_success "清理完成"
     else
