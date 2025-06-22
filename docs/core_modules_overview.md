@@ -1,8 +1,7 @@
 
-Ran tool
+# WonderTrader 核心模块概述
 
-Ran tool
-根据context7的分析结果，下面为您分三步梳理WonderTrader项目的结构、模块细节和综合分析报告：
+本文档详细介绍 WonderTrader 项目的整体架构、核心模块功能和技术实现，帮助开发者快速理解项目结构。
 
 ---
 
@@ -85,8 +84,9 @@ WonderTrader采用高度模块化设计，核心由WtCore驱动，配合行情�
 ---
 
 
-Ran tool
-下面为您详细讲解 WonderTrader 核心模块——**WtCore**：
+## 深入解析：WtCore 核心引擎
+
+下面详细讲解 WonderTrader 核心模块——**WtCore**：
 
 ---
 
@@ -171,8 +171,9 @@ WtCore 是 WonderTrader 的“大脑”，负责调度、管理和协调整个�
 
 
 
-Ran tool
-下面为您详细讲解 WonderTrader 的回测接口模块——**WtBtPorter**：
+## 深入解析：WtBtPorter 回测接口
+
+下面详细讲解 WonderTrader 的回测接口模块——**WtBtPorter**：
 
 ---
 
@@ -265,8 +266,9 @@ WtBtPorter 是 WonderTrader 框架中专门用于“回测仿真”的接口模�
 WtBtPorter 是 WonderTrader 回测体系的“外部接口层”，为策略开发者和自动化测试提供了强大、灵活、易用的回测API。它极大地提升了策略开发、验证和优化的效率，是量化研发流程中不可或缺的核心模块。
 
 
-Ran tool
-下面为您详细讲解 WonderTrader 的执行监控模块——**WtExecMon**：
+## 深入解析：WtExecMon 执行监控
+
+下面详细讲解 WonderTrader 的执行监控模块——**WtExecMon**：
 
 ---
 
@@ -359,8 +361,9 @@ WtExecMon 是 WonderTrader 框架中的“执行监控与算法交易”模块�
 WtExecMon 是 WonderTrader 的“自动化执行与监控”核心模块，适合用于多账户、多通道、多策略的自动化批量交易场景。它为外部系统提供了灵活、强大的目标仓位下发与自动执行能力，是机构级量化交易、算法交易、批量调度等场景的理想选择。
 
 
-Ran tool
-下面为您详细讲解 WonderTrader 的主运行模块——**WtRunner**：
+## 深入解析：WtRunner 主运行器
+
+下面详细讲解 WonderTrader 的主运行模块——**WtRunner**：
 
 ---
 
@@ -449,4 +452,9 @@ WtRunner 是 WonderTrader 框架的“主控运行器”，用于驱动整个量
 
 WtRunner 是 WonderTrader 的“主控大脑”，负责整个系统的初始化、调度和运行。它将行情、交易、执行、策略、数据等各大子系统有机整合，驱动量化交易系统高效、稳定、智能地运行。适合用于实盘、仿真、回测等多种场景，是WonderTrader项目的核心入口。
 
-如需了解某个具体引擎、策略、执行器或配置细节，可以继续指定，我会为您进一步深入讲解！
+---
+
+**作者**: AI Assistant
+**日期**: 2025-06-22
+**版本**: 1.0
+**说明**: 本文档基于 WonderTrader 源码分析生成，为开发者提供核心模块的详细技术参考
