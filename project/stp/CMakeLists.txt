@@ -1,44 +1,20 @@
-# TraderSTP 调试项目 CMakeLists.txt
-cmake_minimum_required(VERSION 3.10)
-
-project(TraderSTP_Debug LANGUAGES CXX)
-
-# 设置 C++ 标准
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# 设置编译类型为 Debug
-set(CMAKE_BUILD_TYPE Debug)
-
-# 添加编译选项
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -Wextra")
-
-# 设置输出目录
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+# STP项目
+project(STP_Project)
 
 # 包含目录
 include_directories(
-    ../../src
-    ../../src/Includes
-    ../../src/Share
-    ../../src/API/stp/include
-    ../../3rd/mydeps_gcc8.4.0/mydeps/include
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/Includes
+    ${CMAKE_SOURCE_DIR}/src/Share
+    ${CMAKE_SOURCE_DIR}/src/API/stp/include
+    ${CMAKE_SOURCE_DIR}/3rd/mydeps_gcc8.4.0/mydeps/include
 )
 
-# 链接目录
-link_directories(
-    .
-    libs
-    ../3rd/mydeps_gcc8.4.0/mydeps/lib
-)
-
-# 源文件
-set(SOURCES
-    src/test_stp_debug.cpp
-)
+# 查找源文件
+file(GLOB STP_TEST_SOURCES "src/*.cpp")
 
 # 创建可执行文件
-add_executable(test_stp_debug ${SOURCES})
+add_executable(test_stp_debug ${STP_TEST_SOURCES})
 
 # 链接库
 target_link_libraries(test_stp_debug
@@ -50,25 +26,15 @@ target_link_libraries(test_stp_debug
     dl
 )
 
-# 设置运行时库路径
+# 设置输出目录
 set_target_properties(test_stp_debug PROPERTIES
-    INSTALL_RPATH "../build_all/build_x64/Release/bin"
-    BUILD_WITH_INSTALL_RPATH TRUE
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
 )
 
-# 添加自定义目标用于复制库文件
-add_custom_target(copy_libs ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ../libs/libTraderSTP.so
-        ${CMAKE_BINARY_DIR}/
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ../libWTSTools.a
-        ${CMAKE_BINARY_DIR}/
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ../libWTSUtils.a
-        ${CMAKE_BINARY_DIR}/
-    COMMENT "复制必要的动态库文件"
+# 自定义目标：运行测试
+add_custom_target(run_stp_test
+    COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR}/libs:${CMAKE_CURRENT_SOURCE_DIR}:$ENV{LD_LIBRARY_PATH}" ${CMAKE_CURRENT_SOURCE_DIR}/bin/test_stp_debug
+    DEPENDS test_stp_debug
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Running STP test..."
 )
-
-# 确保在编译可执行文件之前复制库文件
-add_dependencies(test_stp_debug copy_libs)
