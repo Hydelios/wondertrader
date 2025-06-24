@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.5.0)
 
 PROJECT(WonderTrader)
 
@@ -37,10 +37,10 @@ ELSE (GNUCC)
 
 		MESSAGE(STATUS "MyDepends is at $ENV{MyDependsGcc}")
 	ELSE(UNIX)
-		SET (MyDeps "/root/trading_sys/wondertrader/3rd/mydeps_gcc8.4.0/mydeps")
+		SET (MyDeps "${CMAKE_SOURCE_DIR}/../3rd/mydeps_gcc8.4.0")
 		SET(SUFFIX .so)
 
-		MESSAGE(STATUS "MyDepends is at /root/trading_sys/wondertrader/3rd/mydeps_gcc8.4.0/mydeps")
+		MESSAGE(STATUS "MyDepends is at ${MyDeps}")
 	ENDIF()
 
 	SET(INCS ${MyDeps}/include)
@@ -128,4 +128,9 @@ ADD_SUBDIRECTORY(TestTrader)
 ADD_SUBDIRECTORY(TestTraderSTP)
 ADD_SUBDIRECTORY(TestParser)
 ADD_SUBDIRECTORY(TestUnits)
+
+#sipui project
+if(EXISTS "${CMAKE_SOURCE_DIR}/../project/sipui/CMakeLists.txt")
+    ADD_SUBDIRECTORY(${CMAKE_SOURCE_DIR}/../project/sipui sipui_build)
+endif()
 
