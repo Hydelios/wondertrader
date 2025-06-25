@@ -1,2 +1,11 @@
 dist/*
 3rd/
+project/sipui/build/*
+project/sipui/bin/*
+project/sipui/libs/*
+project/stp/build/*
+project/stp/bin/*
+project/stp/libs/*
+cmake-build-*/
+*.gdb
+*.db*

@@ -1,4 +1,5 @@
 {
+    "version": 4,
     "configurations": [
         {
             "name": "Linux",
@@ -6,18 +7,40 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/src/Includes",
                 "${workspaceFolder}/src/Share",
-                "${workspaceFolder}/project/stp/src",
+                "${workspaceFolder}/src/API/sipsi2Api/inc",
+                "${workspaceFolder}/src/ParserZC",
+                "${workspaceFolder}/3rd/mydeps_gcc8.4.0/include",
+                "${workspaceFolder}/3rd/mydeps_gcc8.4.0/include/boost",
                 "${workspaceFolder}/project/sipui/src",
-                "${workspaceFolder}/3rd/mydeps_gcc8.4.0/mydeps/include",
                 "/usr/include",
-                "/usr/local/include"
+                "/usr/local/include",
+                "/usr/include/c++/9",
+                "/usr/include/x86_64-linux-gnu/c++/9"
             ],
-            "defines": [],
-            "compilerPath": "/usr/bin/g++",
-            "cStandard": "gnu17",
-            "cppStandard": "gnu++17",
-            "intelliSenseMode": "linux-gcc-x64"
+            "defines": [
+                "_DEBUG",
+                "DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "__linux__",
+                "__x86_64__"
+            ],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "configurationProvider": "ms-vscode.cmake-tools",
+            "compileCommands": "${workspaceFolder}/project/sipui/build/compile_commands.json",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "${workspaceFolder}/src",
+                    "${workspaceFolder}/project/sipui",
+                    "${workspaceFolder}/3rd/mydeps_gcc8.4.0/include"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": "${workspaceFolder}/.vscode/browse.vc.db"
+            }
         }
-    ],
-    "version": 4
+    ]
 }

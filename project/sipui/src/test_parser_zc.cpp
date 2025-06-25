@@ -260,9 +260,49 @@ int main(int argc, char *argv[])
         }
 
         std::cout << "开始订阅 " << codes.size() << " 个合约..." << std::endl;
+
+        // 打印转换后的订阅标签格式
+        std::cout << "订阅标签转换:" << std::endl;
+        for (const auto &code : codes)
+        {
+            // 手动转换显示格式
+            std::vector<std::string> parts;
+            size_t pos = code.find('.');
+            if (pos != std::string::npos)
+            {
+                std::string symbol = code.substr(0, pos);
+                std::string exchange = code.substr(pos + 1);
+
+                std::string sipExchange;
+                if (exchange == "SSE")
+                    sipExchange = "SH";
+                else if (exchange == "SZSE")
+                    sipExchange = "SZ";
+                else if (exchange == "SHFE")
+                    sipExchange = "SHFE";
+                else if (exchange == "DCE")
+                    sipExchange = "DCE";
+                else if (exchange == "CZCE")
+                    sipExchange = "CZCE";
+                else if (exchange == "CFFEX")
+                    sipExchange = "CFFEX";
+                else
+                    sipExchange = exchange;
+
+                // 根据中畅接入规范，所有市场都使用L1格式（基础权限）
+                std::string sipTag = sipExchange + "." + symbol + ".L1";
+                std::cout << "  " << code << " -> " << sipTag << std::endl;
+            }
+        }
+
         parser->subscribe(codes);
 
         std::cout << "开始接收行情数据，按Ctrl+C退出..." << std::endl;
+        std::cout << "注意：如果5秒内没有收到数据，可能是以下原因：" << std::endl;
+        std::cout << "1. 当前不在交易时间内" << std::endl;
+        std::cout << "2. 合约代码格式不正确" << std::endl;
+        std::cout << "3. 用户权限不足" << std::endl;
+        std::cout << "4. 网络连接问题" << std::endl;
 
         while (!g_bStopped)
         {

@@ -1,52 +1,60 @@
 {
-    "files.associations": {
-        "*.h": "cpp",
-        "*.cpp": "cpp",
-        "*.yaml": "yaml",
-        "*.yml": "yaml"
-    },
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc",
+    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.default.cppStandard": "c++17",
     "C_Cpp.default.includePath": [
-        "${workspaceFolder}/**",
         "${workspaceFolder}/src/Includes",
         "${workspaceFolder}/src/Share",
-        "${workspaceFolder}/project/stp/src",
-        "${workspaceFolder}/project/sipui/src",
-        "${workspaceFolder}/3rd/mydeps_gcc8.4.0/mydeps/include"
+        "${workspaceFolder}/src/API/sipsi2Api/inc",
+        "${workspaceFolder}/3rd/mydeps_gcc8.4.0/include",
+        "${workspaceFolder}/project/sipui/src"
     ],
-    "C_Cpp.default.compilerPath": "/usr/bin/g++",
-    "C_Cpp.default.cppStandard": "c++17",
-    "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
+    "C_Cpp.default.defines": [
+        "DEBUG",
+        "_DEBUG"
+    ],
+    "C_Cpp.errorSquiggles": "Enabled",
+    "C_Cpp.intelliSenseEngine": "Default",
+    "C_Cpp.autocomplete": "Default",
+    "files.associations": {
+        "*.h": "c",
+        "*.hpp": "cpp",
+        "*.cpp": "cpp",
+        "*.c": "c",
+        "*.cc": "cpp",
+        "*.cxx": "cpp",
+        "*.yaml": "yaml",
+        "*.yml": "yaml",
+        "*.json": "json",
+        "*.md": "markdown"
+    },
+    "cmake.configureOnOpen": false,
+    "cmake.buildDirectory": "${workspaceFolder}/project/sipui/build",
+    "cmake.sourceDirectory": "${workspaceFolder}/project/sipui",
+    "cmake.generator": "Unix Makefiles",
+    "cmake.buildBeforeRun": true,
+    "cmake.debugConfig": {
+        "name": "Debug SIPUI",
+        "cwd": "${workspaceFolder}/project/sipui"
+    },
+    "terminal.integrated.cwd": "${workspaceFolder}",
     "debug.allowBreakpointsEverywhere": true,
     "debug.showBreakpointsInOverviewRuler": true,
-    "terminal.integrated.cwd": "${workspaceFolder}",
-    "explorer.fileNesting.enabled": true,
-    "explorer.fileNesting.patterns": {
-        "*.cpp": "${capture}.h",
-        "*.h": "${capture}.cpp"
-    },
+    "editor.rulers": [80, 120],
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
     "search.exclude": {
-        "**/build*/**": true,
-        "**/dist/**": false,
+        "**/build/**": true,
+        "**/cmake-build-*/**": true,
+        "**/dist/**": true,
         "**/.git/**": true,
-        "**/node_modules/**": true
+        "**/tmp/**": true
     },
     "files.exclude": {
         "**/.git": true,
-        "**/build*": true,
-        "**/dist": false
-    },
-    "cmake.configureOnOpen": false,
-    "cmake.buildDirectory": "${workspaceFolder}/build",
-    "git.ignoreLimitWarning": true,
-    "editor.formatOnSave": true,
-    "editor.tabSize": 4,
-    "editor.insertSpaces": true,
-    "workbench.colorCustomizations": {
-        "activityBar.background": "#1e3a8a",
-        "activityBar.foreground": "#ffffff",
-        "statusBar.background": "#1e40af",
-        "statusBar.foreground": "#ffffff"
-    },
-    "workbench.tree.indent": 20,
-    "breadcrumbs.enabled": true
+        "**/tmp": true
+    }
 }

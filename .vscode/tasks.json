@@ -2,78 +2,16 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "编译所有项目",
-            "type": "shell",
-            "command": "bash",
-            "args": [
-                "build_release.sh"
-            ],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": false
-            },
-            "options": {
-                "cwd": "${workspaceFolder}/src"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "detail": "编译整个 WonderTrader 项目"
-        },
-        {
-            "label": "拷贝库文件到项目目录",
-            "type": "shell",
-            "command": "bash",
-            "args": [
-                "scripts/copy_files.sh",
-                "all"
-            ],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "options": {
-                "cwd": "${workspaceFolder}/project/stp"
-            },
-            "detail": "拷贝所有必要的库文件到STP项目目录"
-        },
-        {
-            "label": "清理 STP 项目调试文件",
-            "type": "shell",
-            "command": "rm",
-            "args": [
-                "-f",
-                "bin/test_stp_debug",
-                "*.o"
-            ],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "options": {
-                "cwd": "${workspaceFolder}/project/stp"
-            },
-            "detail": "清理 STP 项目调试相关的编译文件"
-        },
-        {
-            "label": "编译 STP 项目",
+            "label": "Build SIPUI Debug",
             "type": "shell",
             "command": "bash",
             "args": [
                 "-c",
-                "mkdir -p build && cd build && cmake .. && make"
+                "cd build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make -j4"
             ],
+            "options": {
+                "cwd": "${workspaceFolder}/project/sipui"
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -86,26 +24,43 @@
                 "showReuseMessage": true,
                 "clear": false
             },
-            "options": {
-                "cwd": "${workspaceFolder}/project/stp"
-            },
             "problemMatcher": [
                 "$gcc"
-            ],
-            "detail": "使用CMake编译 STP 项目的测试程序和依赖库"
+            ]
         },
         {
-            "label": "编译 SIPUI 项目",
+            "label": "Clean SIPUI Build",
+            "type": "shell",
+            "command": "rm",
+            "args": [
+                "-rf",
+                "*"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/project/sipui/build"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+        {
+            "label": "Build SIPUI Release",
             "type": "shell",
             "command": "bash",
             "args": [
-                "scripts/build_and_test.sh",
-                "compile"
+                "-c",
+                "cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make -j4"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": false
+            "options": {
+                "cwd": "${workspaceFolder}/project/sipui"
             },
+            "group": "build",
             "presentation": {
                 "echo": true,
                 "reveal": "always",
@@ -114,53 +69,28 @@
                 "showReuseMessage": true,
                 "clear": false
             },
-            "options": {
-                "cwd": "${workspaceFolder}/project/sipui"
-            },
             "problemMatcher": [
                 "$gcc"
-            ],
-            "detail": "编译 SIPUI 项目的中畅解析器测试程序"
+            ]
         },
         {
-            "label": "拷贝 STP 项目文件",
+            "label": "Run SIPUI Test",
             "type": "shell",
-            "command": "bash",
-            "args": [
-                "scripts/copy_files.sh",
-                "all"
-            ],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "options": {
-                "cwd": "${workspaceFolder}/project/stp"
-            },
-            "detail": "拷贝 STP 项目的库文件和配置文件"
-        },
-        {
-            "label": "拷贝 SIPUI 项目文件",
-            "type": "shell",
-            "command": "bash",
-            "args": [
-                "scripts/copy_files.sh",
-                "all"
-            ],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
+            "command": "./bin/test_parser_zc",
+            "args": [],
             "options": {
                 "cwd": "${workspaceFolder}/project/sipui"
             },
-            "detail": "拷贝 SIPUI 项目的库文件和配置文件"
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "dependsOn": "Build SIPUI Debug"
         }
     ]
 }

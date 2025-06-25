@@ -4,7 +4,7 @@
  *
  * \author AI Assistant
  * \date 2025/01/17
- * 
+ *
  * \brief 中畅行情解析器实现
  */
 
@@ -35,16 +35,7 @@ USING_NS_WTP;
 // 构造函数和析构函数
 
 ParserZC::ParserZC()
-    : m_hSipHandle(INVALID_SIPHANDLE)
-    , m_connectionStatus(ZC_CS_DISCONNECTED)
-    , m_pSpi(nullptr)
-    , m_pBaseDataMgr(nullptr)
-    , m_bStopped(false)
-    , m_bInitialized(false)
-    , m_uTradingDate(0)
-    , m_uTickCount(0)
-    , m_uErrorCount(0)
-    , m_uLastHeartbeat(0)
+    : m_hSipHandle(INVALID_SIPHANDLE), m_connectionStatus(ZC_CS_DISCONNECTED), m_pSpi(nullptr), m_pBaseDataMgr(nullptr), m_bStopped(false), m_bInitialized(false), m_uTradingDate(0), m_uTickCount(0), m_uErrorCount(0), m_uLastHeartbeat(0)
 {
     initErrorMessages();
 }
@@ -57,15 +48,15 @@ ParserZC::~ParserZC()
 //////////////////////////////////////////////////////////////////////////
 // IParserApi接口实现
 
-bool ParserZC::init(WTSVariant* config)
+bool ParserZC::init(WTSVariant *config)
 {
-    if(m_bInitialized.load())
+    if (m_bInitialized.load())
     {
         WTSLogger::warn("ParserZC already initialized");
         return true;
     }
 
-    if(config == nullptr)
+    if (config == nullptr)
     {
         WTSLogger::error("ParserZC init failed: config is null");
         return false;
@@ -74,14 +65,14 @@ bool ParserZC::init(WTSVariant* config)
     try
     {
         // 读取基本连接配置
-        const char* host = config->getCString("host");
+        const char *host = config->getCString("host");
         m_configInfo.server_ip = host ? host : "";
         m_configInfo.server_port = config->has("port") ? config->getUInt32("port") : 30002;
 
         // 读取用户认证配置
-        const char* user = config->getCString("user");
+        const char *user = config->getCString("user");
         m_configInfo.user_id = user ? user : "";
-        const char* pass = config->getCString("pass");
+        const char *pass = config->getCString("pass");
         m_configInfo.password = pass ? pass : "";
 
         // 读取连接模式配置
@@ -91,31 +82,31 @@ bool ParserZC::init(WTSVariant* config)
         m_configInfo.timeout_ms = config->has("timeout") ? config->getUInt32("timeout") : 10000;
 
         // 验证连接模式的有效性
-        if(m_configInfo.login_mode < LOGIN_NR || m_configInfo.login_mode > LOGIN_MCB)
+        if (m_configInfo.login_mode < LOGIN_NR || m_configInfo.login_mode > LOGIN_MCB)
         {
             WTSLogger::warn("ParserZC invalid login mode {}, using default LOGIN_NR", m_configInfo.login_mode);
             m_configInfo.login_mode = LOGIN_NR;
         }
 
         // 代理配置(可选)
-        if(config->has("proxy"))
+        if (config->has("proxy"))
         {
-            WTSVariant* proxy_cfg = config->get("proxy");
-            if(proxy_cfg != nullptr)
+            WTSVariant *proxy_cfg = config->get("proxy");
+            if (proxy_cfg != nullptr)
             {
                 m_configInfo.proxy_type = proxy_cfg->has("type") ? proxy_cfg->getInt32("type") : TCPC_PROXY_NONE;
-                const char* proxy_host = proxy_cfg->getCString("host");
+                const char *proxy_host = proxy_cfg->getCString("host");
                 m_configInfo.proxy_ip = proxy_host ? proxy_host : "";
                 m_configInfo.proxy_port = proxy_cfg->has("port") ? proxy_cfg->getUInt32("port") : 0;
-                const char* proxy_user = proxy_cfg->getCString("user");
+                const char *proxy_user = proxy_cfg->getCString("user");
                 m_configInfo.proxy_user = proxy_user ? proxy_user : "";
-                const char* proxy_pass = proxy_cfg->getCString("pass");
+                const char *proxy_pass = proxy_cfg->getCString("pass");
                 m_configInfo.proxy_pass = proxy_pass ? proxy_pass : "";
 
                 // 验证代理配置
-                if(m_configInfo.proxy_type != TCPC_PROXY_NONE)
+                if (m_configInfo.proxy_type != TCPC_PROXY_NONE)
                 {
-                    if(m_configInfo.proxy_ip.empty() || m_configInfo.proxy_port == 0)
+                    if (m_configInfo.proxy_ip.empty() || m_configInfo.proxy_port == 0)
                     {
                         WTSLogger::warn("ParserZC invalid proxy configuration, disabling proxy");
                         m_configInfo.proxy_type = TCPC_PROXY_NONE;
@@ -123,39 +114,39 @@ bool ParserZC::init(WTSVariant* config)
                     else
                     {
                         WTSLogger::info("ParserZC proxy enabled - Type: {}, Server: {}:{}",
-                                       m_configInfo.proxy_type, m_configInfo.proxy_ip, m_configInfo.proxy_port);
+                                        m_configInfo.proxy_type, m_configInfo.proxy_ip, m_configInfo.proxy_port);
                     }
                 }
             }
         }
 
         // 验证必需配置
-        if(m_configInfo.server_ip.empty())
+        if (m_configInfo.server_ip.empty())
         {
             WTSLogger::error("ParserZC init failed: server host is required");
             return false;
         }
 
-        if(m_configInfo.server_port == 0 || m_configInfo.server_port > 65535)
+        if (m_configInfo.server_port == 0 || m_configInfo.server_port > 65535)
         {
             WTSLogger::error("ParserZC init failed: invalid server port {}", m_configInfo.server_port);
             return false;
         }
 
-        if(m_configInfo.user_id.empty())
+        if (m_configInfo.user_id.empty())
         {
             WTSLogger::error("ParserZC init failed: user ID is required");
             return false;
         }
 
-        if(m_configInfo.password.empty())
+        if (m_configInfo.password.empty())
         {
             WTSLogger::error("ParserZC init failed: password is required");
             return false;
         }
 
         // 验证超时配置
-        if(m_configInfo.timeout_ms < 1000 || m_configInfo.timeout_ms > 60000)
+        if (m_configInfo.timeout_ms < 1000 || m_configInfo.timeout_ms > 60000)
         {
             WTSLogger::warn("ParserZC invalid timeout {}, using default 10000ms", m_configInfo.timeout_ms);
             m_configInfo.timeout_ms = 10000;
@@ -163,22 +154,22 @@ bool ParserZC::init(WTSVariant* config)
 
         // 初始化sipsi2接口
         m_hSipHandle = UI_Open(OnNotifyCallback, (CBPARAM)this);
-        if(m_hSipHandle == INVALID_SIPHANDLE)
+        if (m_hSipHandle == INVALID_SIPHANDLE)
         {
             WTSLogger::error("ParserZC init failed: UI_Open error");
             return false;
         }
 
         // 设置代理(如果配置了)
-        if(m_configInfo.proxy_type != TCPC_PROXY_NONE)
+        if (m_configInfo.proxy_type != TCPC_PROXY_NONE)
         {
             SIPRET ret = UI_SetPproxyInfo(m_hSipHandle,
-                                         m_configInfo.proxy_type,
-                                         m_configInfo.proxy_ip.c_str(),
-                                         m_configInfo.proxy_port,
-                                         m_configInfo.proxy_user.c_str(),
-                                         m_configInfo.proxy_pass.c_str());
-            if(ret != SIPE_OK)
+                                          m_configInfo.proxy_type,
+                                          m_configInfo.proxy_ip.c_str(),
+                                          m_configInfo.proxy_port,
+                                          m_configInfo.proxy_user.c_str(),
+                                          m_configInfo.proxy_pass.c_str());
+            if (ret != SIPE_OK)
             {
                 logSipError(ret, "UI_SetPproxyInfo");
                 UI_Close(m_hSipHandle);
@@ -191,11 +182,11 @@ bool ParserZC::init(WTSVariant* config)
         m_uTradingDate = getTradingDate();
 
         WTSLogger::info("ParserZC initialized successfully - Server: {}:{}, User: {}, Mode: {}",
-                       m_configInfo.server_ip, m_configInfo.server_port, 
-                       m_configInfo.user_id, m_configInfo.login_mode);
+                        m_configInfo.server_ip, m_configInfo.server_port,
+                        m_configInfo.user_id, m_configInfo.login_mode);
         return true;
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         WTSLogger::error("ParserZC init failed with exception: {}", e.what());
         return false;
@@ -205,17 +196,17 @@ bool ParserZC::init(WTSVariant* config)
 void ParserZC::release()
 {
     m_bStopped = true;
-    
+
     // 断开连接
     disconnect();
-    
+
     // 关闭sipsi2接口
-    if(m_hSipHandle != INVALID_SIPHANDLE)
+    if (m_hSipHandle != INVALID_SIPHANDLE)
     {
         UI_Close(m_hSipHandle);
         m_hSipHandle = INVALID_SIPHANDLE;
     }
-    
+
     // 清理资源
     {
         StdUniqueLock lock(m_mtxInstruments);
@@ -223,39 +214,39 @@ void ParserZC::release()
         m_setPendingSub.clear();
         m_setPendingUnsub.clear();
     }
-    
+
     m_pSpi = nullptr;
     m_pBaseDataMgr = nullptr;
     m_bInitialized = false;
-    
-    WTSLogger::info("ParserZC released - Ticks: {}, Errors: {}", 
-                   m_uTickCount.load(), m_uErrorCount.load());
+
+    WTSLogger::info("ParserZC released - Ticks: {}, Errors: {}",
+                    m_uTickCount.load(), m_uErrorCount.load());
 }
 
 bool ParserZC::connect()
 {
-    if(!m_bInitialized.load())
+    if (!m_bInitialized.load())
     {
         WTSLogger::error("ParserZC connect failed: not initialized");
         return false;
     }
-    
-    if(m_connectionStatus.load() == ZC_CS_CONNECTED || 
-       m_connectionStatus.load() == ZC_CS_LOGGEDIN)
+
+    if (m_connectionStatus.load() == ZC_CS_CONNECTED ||
+        m_connectionStatus.load() == ZC_CS_LOGGEDIN)
     {
         WTSLogger::warn("ParserZC already connected");
         return true;
     }
-    
+
     StdUniqueLock lock(m_mtxConnection);
     return doConnect();
 }
 
 bool ParserZC::disconnect()
 {
-    if(m_connectionStatus.load() == ZC_CS_DISCONNECTED)
+    if (m_connectionStatus.load() == ZC_CS_DISCONNECTED)
         return true;
-    
+
     StdUniqueLock lock(m_mtxConnection);
     doDisconnect();
     return true;
@@ -269,48 +260,48 @@ bool ParserZC::isConnected()
 
 void ParserZC::subscribe(const CodeSet &vecSymbols)
 {
-    if(vecSymbols.empty())
+    if (vecSymbols.empty())
         return;
-        
-    if(!isConnected())
+
+    if (!isConnected())
     {
         WTSLogger::warn("ParserZC subscribe failed: not connected");
         // 将待订阅合约加入待处理列表
         StdUniqueLock lock(m_mtxInstruments);
-        for(const auto& symbol : vecSymbols)
+        for (const auto &symbol : vecSymbols)
         {
             m_setPendingSub.insert(symbol);
         }
         return;
     }
-    
+
     doSubscribe(vecSymbols);
 }
 
 void ParserZC::unsubscribe(const CodeSet &vecSymbols)
 {
-    if(vecSymbols.empty())
+    if (vecSymbols.empty())
         return;
-        
-    if(!isConnected())
+
+    if (!isConnected())
     {
         WTSLogger::warn("ParserZC unsubscribe failed: not connected");
-        // 将待取消订阅合约加入待处理列表  
+        // 将待取消订阅合约加入待处理列表
         StdUniqueLock lock(m_mtxInstruments);
-        for(const auto& symbol : vecSymbols)
+        for (const auto &symbol : vecSymbols)
         {
             m_setPendingUnsub.insert(symbol);
         }
         return;
     }
-    
+
     doUnsubscribe(vecSymbols);
 }
 
-void ParserZC::registerSpi(IParserSpi* listener)
+void ParserZC::registerSpi(IParserSpi *listener)
 {
     m_pSpi = listener;
-    if(listener && m_pBaseDataMgr == nullptr)
+    if (listener && m_pBaseDataMgr == nullptr)
     {
         m_pBaseDataMgr = listener->getBaseDataMgr();
     }
@@ -319,107 +310,153 @@ void ParserZC::registerSpi(IParserSpi* listener)
 //////////////////////////////////////////////////////////////////////////
 // sipsi2Api回调处理
 
-void __stdcall ParserZC::OnNotifyCallback(TPKG_SIP* pPkg, CBPARAM pParam)
+void __stdcall ParserZC::OnNotifyCallback(TPKG_SIP *pPkg, CBPARAM pParam)
 {
-    ParserZC* pParser = reinterpret_cast<ParserZC*>(pParam);
-    if(pParser == nullptr || pPkg == nullptr || pParser->m_bStopped.load())
+    ParserZC *pParser = reinterpret_cast<ParserZC *>(pParam);
+    if (pParser == nullptr || pPkg == nullptr || pParser->m_bStopped.load())
         return;
-        
+
     StdUniqueLock lock(pParser->m_mtxCallback);
-    
+
     try
     {
-        switch(pPkg->PkgCode)
+        switch (pPkg->PkgCode)
         {
         case CPKG_SVRPUTMSG: // 实时行情数据
-            {
-                TPKG_SIP_TAGMSGS* pTagMsgs = reinterpret_cast<TPKG_SIP_TAGMSGS*>(pPkg);
-                UI_ParseTagMsgs(pTagMsgs,
-                              [](T_SIPTAGMSG* pMsg, void* pParam) {
+        {
+            TPKG_SIP_TAGMSGS *pTagMsgs = reinterpret_cast<TPKG_SIP_TAGMSGS *>(pPkg);
+            UI_ParseTagMsgs(pTagMsgs, [](T_SIPTAGMSG *pMsg, void *pParam)
+                            {
                                   ParserZC* parser = reinterpret_cast<ParserZC*>(pParam);
-                                  parser->handleMarketData(pMsg);
-                              },
-                              pParser);
-            }
-            break;
-            
+                                  parser->handleMarketData(pMsg); }, pParser);
+        }
+        break;
+
         case CPKG_SSCTAGERRNOTIFY: // 标签错误通知
-            {
-                TPKG_SIP_TAGERR* pErrPkg = reinterpret_cast<TPKG_SIP_TAGERR*>(pPkg);
-                pParser->handleErrorNotify(pErrPkg);
-            }
-            break;
-            
+        {
+            TPKG_SIP_TAGERR *pErrPkg = reinterpret_cast<TPKG_SIP_TAGERR *>(pPkg);
+            pParser->handleErrorNotify(pErrPkg);
+        }
+        break;
+
         default:
             pParser->handleConnectionStatus(pPkg);
             break;
         }
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         WTSLogger::error("ParserZC callback exception: {}", e.what());
         pParser->m_uErrorCount++;
     }
 }
 
-void ParserZC::handleMarketData(T_SIPTAGMSG* pMsg)
+void ParserZC::handleMarketData(T_SIPTAGMSG *pMsg)
 {
-    if(pMsg == nullptr || m_pSpi == nullptr)
+    if (pMsg == nullptr || m_pSpi == nullptr)
         return;
-        
+
+    // 添加调试日志
+    WTSLogger::info("ParserZC received market data - MsgType: {}, Code: {}",
+                    pMsg->MsgType, pMsg->Code);
+
     try
     {
-        WTSTickData* tick = parseTickData(pMsg);
-        if(tick != nullptr)
+        WTSTickData *tick = parseTickData(pMsg);
+        if (tick != nullptr)
         {
             m_uTickCount++;
+            WTSLogger::info("ParserZC parsed tick data for: {}, price: {}",
+                            tick->code(), tick->price());
             m_pSpi->handleQuote(tick, 1);
             tick->release();
         }
+        else
+        {
+            WTSLogger::warn("ParserZC failed to parse tick data - MsgType: {}", pMsg->MsgType);
+        }
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         WTSLogger::error("ParserZC handleMarketData exception: {}", e.what());
         m_uErrorCount++;
     }
 }
 
-void ParserZC::handleConnectionStatus(TPKG_SIP* pPkg)
+void ParserZC::handleConnectionStatus(TPKG_SIP *pPkg)
 {
     // 处理连接状态变化
     // TPKG_SIP本身没有ErrCode，需要根据PkgCode判断类型
-    if(pPkg->PkgCode == CPKG_LOCAL_ERR || pPkg->PkgCode == CPKG_PKGERR)
+    if (pPkg->PkgCode == CPKG_LOCAL_ERR || pPkg->PkgCode == CPKG_PKGERR)
     {
-        TPKG_SIP_SST* pSstPkg = (TPKG_SIP_SST*)pPkg;
-        if(pSstPkg->ErrCode == SIPE_ASYNCONNECTOK)
-    {
-        m_connectionStatus = ZC_CS_LOGGEDIN;
-        WTSLogger::info("ParserZC async connection success");
-        
-        if(m_pSpi)
+        TPKG_SIP_SST *pSstPkg = (TPKG_SIP_SST *)pPkg;
+        if (pSstPkg->ErrCode == SIPE_ASYNCONNECTOK)
         {
-            m_pSpi->handleEvent(WPE_Connect, 0);
+            m_connectionStatus = ZC_CS_LOGGEDIN;
+            WTSLogger::info("ParserZC async connection success");
+
+            if (m_pSpi)
+            {
+                m_pSpi->handleEvent(WPE_Connect, 0);
+            }
+
+            // 处理待订阅的合约
+            CodeSet pendingSub;
+            {
+                StdUniqueLock lock(m_mtxInstruments);
+                pendingSub = m_setPendingSub;
+                m_setPendingSub.clear();
+            }
+
+            if (!pendingSub.empty())
+            {
+                doSubscribe(pendingSub);
+            }
         }
-        
-        // 处理待订阅的合约
-        CodeSet pendingSub;
-        {
-            StdUniqueLock lock(m_mtxInstruments);
-            pendingSub = m_setPendingSub;
-            m_setPendingSub.clear();
-        }
-        
-        if(!pendingSub.empty())
-        {
-            doSubscribe(pendingSub);
-        }
-        }
-        else if(pSstPkg->ErrCode == SIPE_ASYNCONNECTERR || pSstPkg->ErrCode == SIPE_DISCONNECT)
+        else if (pSstPkg->ErrCode == SIPE_DISCONNECT)
         {
             m_connectionStatus = ZC_CS_DISCONNECTED;
-            WTSLogger::warn("ParserZC connection lost, error: {}", pSstPkg->ErrCode);
+            WTSLogger::warn("ParserZC connection lost (SIPE_DISCONNECT), attempting reconnect...");
 
-            if(m_pSpi)
+            // 参考demo实现：自动重连和重新订阅
+            if (doConnect())
+            {
+                WTSLogger::info("ParserZC reconnected successfully");
+
+                // 重新订阅之前的合约
+                CodeSet subscribedCodes;
+                {
+                    StdUniqueLock lock(m_mtxInstruments);
+                    for (const auto &pair : m_mapInstruments)
+                    {
+                        if (pair.second.is_subscribed)
+                        {
+                            subscribedCodes.insert(pair.first);
+                        }
+                    }
+                }
+
+                if (!subscribedCodes.empty())
+                {
+                    WTSLogger::info("ParserZC re-subscribing {} instruments after reconnect", subscribedCodes.size());
+                    doSubscribe(subscribedCodes);
+                }
+            }
+            else
+            {
+                WTSLogger::error("ParserZC reconnect failed");
+                if (m_pSpi)
+                {
+                    m_pSpi->handleEvent(WPE_Close, 0);
+                }
+            }
+        }
+        else if (pSstPkg->ErrCode == SIPE_ASYNCONNECTERR)
+        {
+            m_connectionStatus = ZC_CS_DISCONNECTED;
+            WTSLogger::error("ParserZC async connection error");
+
+            if (m_pSpi)
             {
                 m_pSpi->handleEvent(WPE_Close, 0);
             }
@@ -427,26 +464,26 @@ void ParserZC::handleConnectionStatus(TPKG_SIP* pPkg)
     }
 }
 
-void ParserZC::handleErrorNotify(TPKG_SIP_TAGERR* pErrPkg)
+void ParserZC::handleErrorNotify(TPKG_SIP_TAGERR *pErrPkg)
 {
-    if(pErrPkg == nullptr)
+    if (pErrPkg == nullptr)
         return;
 
     m_uErrorCount++;
 
     // 记录错误信息
     // TPKG_SIP_TAGERR包含多个SIP_TAGERR，需要遍历处理
-    for(uint32_t i = 0; i < pErrPkg->TagNum && i < 255; i++)
+    for (uint32_t i = 0; i < pErrPkg->TagNum && i < 255; i++)
     {
-        const SIP_TAGERR& tagErr = pErrPkg->TagErr[i];
+        const SIP_TAGERR &tagErr = pErrPkg->TagErr[i];
         WTSLogger::error("ParserZC tag error - Tag: {}, Code: {}, Message: {}",
-                        tagErr.TagCode, tagErr.Errcode, getErrorMessage(tagErr.Errcode));
+                         tagErr.TagCode, tagErr.Errcode, getErrorMessage(tagErr.Errcode));
     }
 }
 
-bool ParserZC::requestSymbolList(const std::string& info_server_ip, uint16_t info_server_port)
+bool ParserZC::requestSymbolList(const std::string &info_server_ip, uint16_t info_server_port)
 {
-    if(m_hSipHandle == INVALID_SIPHANDLE)
+    if (m_hSipHandle == INVALID_SIPHANDLE)
     {
         WTSLogger::error("ParserZC requestSymbolList failed: invalid handle");
         return false;
@@ -460,16 +497,16 @@ bool ParserZC::requestSymbolList(const std::string& info_server_ip, uint16_t inf
 
     // 调用sipsi2Api获取合约列表
     SIPRET ret = INFO_GetCodes(m_hSipHandle,
-                              server_ip.c_str(),
-                              server_port,
-                              m_configInfo.user_id.c_str(),
-                              m_configInfo.password.c_str(),
-                              "*",  // 所有市场
-                              "*",  // 所有证券
-                              onContractListCallback,
-                              this);
+                               server_ip.c_str(),
+                               server_port,
+                               m_configInfo.user_id.c_str(),
+                               m_configInfo.password.c_str(),
+                               "*", // 所有市场
+                               "*", // 所有证券
+                               onContractListCallback,
+                               this);
 
-    if(ret == SIPE_OK)
+    if (ret == SIPE_OK)
     {
         WTSLogger::info("ParserZC symbol list request sent successfully");
         return true;
@@ -481,43 +518,43 @@ bool ParserZC::requestSymbolList(const std::string& info_server_ip, uint16_t inf
     }
 }
 
-void _cdecl ParserZC::onServerListCallback(T_ONLINEUISVR svrs[], unsigned int count, void* pParam)
+void _cdecl ParserZC::onServerListCallback(T_ONLINEUISVR svrs[], unsigned int count, void *pParam)
 {
-    ParserZC* pParser = static_cast<ParserZC*>(pParam);
-    if(pParser == nullptr)
+    ParserZC *pParser = static_cast<ParserZC *>(pParam);
+    if (pParser == nullptr)
         return;
 
     WTSLogger::info("ParserZC received server list with {} servers", count);
 
-    for(unsigned int i = 0; i < count; i++)
+    for (unsigned int i = 0; i < count; i++)
     {
-        const T_ONLINEUISVR& svr = svrs[i];
+        const T_ONLINEUISVR &svr = svrs[i];
         WTSLogger::info("ParserZC server {}: {}:{} - {} (connections: {})",
-                       i, svr.wanip, svr.wport, svr.svrname, svr.connum);
+                        i, svr.wanip, svr.wport, svr.svrname, svr.connum);
     }
 }
 
-void _cdecl ParserZC::onContractListCallback(T_SCITEMEX contracts[], unsigned int count, void* pParam)
+void _cdecl ParserZC::onContractListCallback(T_SCITEMEX contracts[], unsigned int count, void *pParam)
 {
-    ParserZC* pParser = static_cast<ParserZC*>(pParam);
-    if(pParser == nullptr)
+    ParserZC *pParser = static_cast<ParserZC *>(pParam);
+    if (pParser == nullptr)
         return;
 
     WTSLogger::info("ParserZC received contract list with {} contracts", count);
 
     StdUniqueLock lock(pParser->m_mtxInstruments);
 
-    for(unsigned int i = 0; i < count; i++)
+    for (unsigned int i = 0; i < count; i++)
     {
-        const T_SCITEMEX& contract = contracts[i];
+        const T_SCITEMEX &contract = contracts[i];
 
         // 构造标签名：市场代码.证券代码.数据类型
         std::string tag_name = std::string(contract.mkcode) + "." +
-                              std::string(contract.sccode) + "." +
-                              std::string(contract.sctype);
+                               std::string(contract.sccode) + "." +
+                               std::string(contract.sctype);
         std::string instrument_code = pParser->parseInstrumentCode(tag_name.c_str());
 
-        if(!instrument_code.empty())
+        if (!instrument_code.empty())
         {
             ZCInstrumentInfo info;
             info.tag_name = tag_name;
@@ -527,10 +564,10 @@ void _cdecl ParserZC::onContractListCallback(T_SCITEMEX contracts[], unsigned in
 
             pParser->m_mapInstruments[instrument_code] = info;
 
-            if(i < 10) // 只记录前10个合约的详细信息
+            if (i < 10) // 只记录前10个合约的详细信息
             {
                 WTSLogger::info("ParserZC contract {}: {} -> {} ({})",
-                               i, tag_name, instrument_code, contract.name);
+                                i, tag_name, instrument_code, contract.name);
             }
         }
     }
@@ -541,81 +578,83 @@ void _cdecl ParserZC::onContractListCallback(T_SCITEMEX contracts[], unsigned in
 //////////////////////////////////////////////////////////////////////////
 // 订阅管理方法实现
 
-bool ParserZC::doSubscribe(const CodeSet& codes)
+bool ParserZC::doSubscribe(const CodeSet &codes)
 {
-    if(codes.empty() || m_hSipHandle == INVALID_SIPHANDLE)
+    if (codes.empty() || m_hSipHandle == INVALID_SIPHANDLE)
         return false;
-        
+
     // 构造sipsi2的订阅标签结构
     std::vector<T_SSCTAG> tags;
     tags.reserve(codes.size());
-    
-    for(const auto& code : codes)
+
+    for (const auto &code : codes)
     {
         T_SSCTAG tag;
         memset(&tag, 0, sizeof(tag));
-        
+
         // 将WonderTrader格式的代码转换为sipsi2标签格式
         std::string tagName = convertToSipTagName(code);
-        if(tagName.empty())
+        if (tagName.empty())
         {
             WTSLogger::warn("ParserZC invalid code format: {}", code);
             continue;
         }
-        
+
         strncpy(tag.sTag, tagName.c_str(), sizeof(tag.sTag) - 1);
         tag.cMode = SSC_MODE_INC; // 增量订阅模式
+        tag.uSeqNo = -1; // 参考demo设置序列号
         tags.push_back(tag);
-        
+
         // 更新本地订阅状态
         {
             StdUniqueLock lock(m_mtxInstruments);
-            ZCInstrumentInfo& info = m_mapInstruments[code];
+            ZCInstrumentInfo &info = m_mapInstruments[code];
             info.instrument_code = code;
             info.is_subscribed = true;
             info.sub_time = TimeUtils::getLocalTimeNow();
         }
-        
-        WTSLogger::debug("ParserZC subscribing: {} -> {}", code, tagName);
+
+        WTSLogger::info("ParserZC subscribing: {} -> {} (mode={}, seqno={})",
+                       code, tagName, tag.cMode, tag.uSeqNo);
     }
-    
-    if(tags.empty())
+
+    if (tags.empty())
     {
         WTSLogger::warn("ParserZC doSubscribe: no valid codes to subscribe");
         return false;
     }
-    
+
     // 调用sipsi2Api订阅
     SIPRET ret = UI_SubscribeTags(m_hSipHandle, tags.data(), tags.size());
-    if(ret == SIPE_OK)
+    if (ret == SIPE_OK)
     {
         // 更新订阅状态为已订阅
         {
             StdUniqueLock lock(m_mtxInstruments);
-            for(const auto& code : codes)
+            for (const auto &code : codes)
             {
                 auto it = m_mapInstruments.find(code);
-                if(it != m_mapInstruments.end())
+                if (it != m_mapInstruments.end())
                 {
                     it->second.is_subscribed = true;
                 }
             }
         }
-        
+
         WTSLogger::info("ParserZC subscribed {} instruments successfully", codes.size());
         return true;
     }
     else
     {
         logSipError(ret, "UI_SubscribeTags");
-        
+
         // 更新订阅状态为失败
         {
             StdUniqueLock lock(m_mtxInstruments);
-            for(const auto& code : codes)
+            for (const auto &code : codes)
             {
                 auto it = m_mapInstruments.find(code);
-                if(it != m_mapInstruments.end())
+                if (it != m_mapInstruments.end())
                 {
                     it->second.is_subscribed = false;
                 }
@@ -625,72 +664,72 @@ bool ParserZC::doSubscribe(const CodeSet& codes)
     }
 }
 
-bool ParserZC::doUnsubscribe(const CodeSet& codes)
+bool ParserZC::doUnsubscribe(const CodeSet &codes)
 {
-    if(codes.empty() || m_hSipHandle == INVALID_SIPHANDLE)
+    if (codes.empty() || m_hSipHandle == INVALID_SIPHANDLE)
         return false;
-        
+
     // 构造sipsi2的取消订阅标签结构
     std::vector<T_SSCTAG> tags;
     tags.reserve(codes.size());
-    
-    for(const auto& code : codes)
+
+    for (const auto &code : codes)
     {
         // 检查是否已订阅
         {
             StdUniqueLock lock(m_mtxInstruments);
             auto it = m_mapInstruments.find(code);
-            if(it == m_mapInstruments.end() || !it->second.is_subscribed)
+            if (it == m_mapInstruments.end() || !it->second.is_subscribed)
             {
                 WTSLogger::warn("ParserZC code not subscribed: {}", code);
                 continue;
             }
             it->second.is_subscribed = false;
         }
-        
+
         T_SSCTAG tag;
         memset(&tag, 0, sizeof(tag));
-        
+
         std::string tagName = convertToSipTagName(code);
-        if(tagName.empty())
+        if (tagName.empty())
             continue;
-            
+
         strncpy(tag.sTag, tagName.c_str(), sizeof(tag.sTag) - 1);
         tags.push_back(tag);
-        
+
         WTSLogger::debug("ParserZC unsubscribing: {} -> {}", code, tagName);
     }
-    
-    if(tags.empty())
+
+    if (tags.empty())
         return true; // 没有需要取消订阅的
-    
+
     // 调用sipsi2Api取消订阅
     SIPRET ret = UI_UnSubscribeTags(m_hSipHandle, tags.data(), tags.size());
-    if(ret == SIPE_OK)
+    if (ret == SIPE_OK)
     {
         // 从本地映射中移除
         {
             StdUniqueLock lock(m_mtxInstruments);
-            for(const auto& code : codes)
+            for (const auto &code : codes)
             {
                 m_mapInstruments.erase(code);
             }
         }
-        
+
         WTSLogger::info("ParserZC unsubscribed {} instruments successfully", codes.size());
         return true;
     }
     else
     {
         logSipError(ret, "UI_UnSubscribeTags");
-        
+
         // 恢复订阅状态
         {
             StdUniqueLock lock(m_mtxInstruments);
-            for(const auto& code : codes)
+            for (const auto &code : codes)
             {
                 auto it = m_mapInstruments.find(code);
-                if(it != m_mapInstruments.end())
+                if (it != m_mapInstruments.end())
                 {
                     it->second.is_subscribed = true;
                 }
@@ -703,16 +742,16 @@ bool ParserZC::doUnsubscribe(const CodeSet& codes)
 //////////////////////////////////////////////////////////////////////////
 // 数据转换方法实现
 
-WTSTickData* ParserZC::parseTickData(T_SIPTAGMSG* pMsg)
+WTSTickData *ParserZC::parseTickData(T_SIPTAGMSG *pMsg)
 {
-    if(pMsg == nullptr || pMsg->MsgDataSize == 0)
+    if (pMsg == nullptr || pMsg->MsgDataSize == 0)
         return nullptr;
 
     try
     {
         // 解析合约代码
         std::string instrument = parseInstrumentCode(pMsg->Code);
-        if(instrument.empty())
+        if (instrument.empty())
         {
             WTSLogger::debug("ParserZC parseTickData: invalid instrument code from {}", pMsg->Code);
             return nullptr;
@@ -723,135 +762,202 @@ WTSTickData* ParserZC::parseTickData(T_SIPTAGMSG* pMsg)
 
         WTSLogger::debug("ParserZC parsing message type {} for {}", msgType, instrument);
 
-        switch(msgType)
+        switch (msgType)
         {
-            // 上海证券交易所
-            case ZC_MSG_SH_INDEX:         // 1000 - 上证指数快照
-            case ZC_MSG_SZ_INDEX:         // 2000 - 深证指数快照
-            case ZC_MSG_ZZZS_INDEX:       // 7002 - 中证指数快照
-                return parseIndexData(pMsg, instrument);
+        // 上海证券交易所
+        case ZC_MSG_SH_INDEX:   // 1000 - 上证指数快照
+        case ZC_MSG_SZ_INDEX:   // 2000 - 深证指数快照
+        case ZC_MSG_ZZZS_INDEX: // 7002 - 中证指数快照
+            return parseIndexData(pMsg, instrument);
 
-            case ZC_MSG_SH_TRANSACTION:   // 1001 - 上证逐笔成交
-            case ZC_MSG_SZ_TRANSACTION:   // 2001 - 深证逐笔成交
-                return parseTransactionData(pMsg, instrument);
+        case ZC_MSG_SH_TRANSACTION: // 1001 - 上证逐笔成交
+        case ZC_MSG_SZ_TRANSACTION: // 2001 - 深证逐笔成交
+            return parseTransactionData(pMsg, instrument);
 
-            case ZC_MSG_SH_ORDER_QUEUE:   // 1002 - 上证委托队列快照
-            case ZC_MSG_SZ_ORDER_QUEUE:   // 2002 - 深证委托队列快照
-                return parseOrderQueueData(pMsg, instrument);
+        case ZC_MSG_SH_ORDER_QUEUE: // 1002 - 上证委托队列快照
+        case ZC_MSG_SZ_ORDER_QUEUE: // 2002 - 深证委托队列快照
+            return parseOrderQueueData(pMsg, instrument);
 
-            case ZC_MSG_SH_L2_SNAPSHOT:   // 1004 - 上证L2快照
-            case ZC_MSG_SZ_L2_SNAPSHOT:   // 2004 - 深证L2快照
-                return parseStockL2Data(pMsg, instrument);
+        case ZC_MSG_SH_L2_SNAPSHOT: // 1004 - 上证L2快照
+        case ZC_MSG_SZ_L2_SNAPSHOT: // 2004 - 深证L2快照
+            return parseStockL2Data(pMsg, instrument);
 
-            case ZC_MSG_SH_L1_SNAPSHOT:   // 1005 - 上证L1快照
-            case ZC_MSG_SZ_L1_SNAPSHOT:   // 2005 - 深证L1快照
-                return parseStockL1Data(pMsg, instrument);
+        case ZC_MSG_SH_L1_SNAPSHOT: // 1005 - 上证L1快照
+        case ZC_MSG_SZ_L1_SNAPSHOT: // 2005 - 深证L1快照
+            return parseStockL1Data(pMsg, instrument);
 
-            // 期货交易所
-            case ZC_MSG_CFFEX_SNAPSHOT:   // 3002 - 中金所行情快照
-            case ZC_MSG_CZCE_SNAPSHOT:    // 4002 - 郑商所行情快照
-            case ZC_MSG_DCE_SNAPSHOT:     // 5002 - 大商所行情快照
-            case ZC_MSG_SHFE_SNAPSHOT:    // 6002 - 上期所行情快照
-                return parseFutureData(pMsg, instrument);
+        // 期货交易所
+        case ZC_MSG_CFFEX_SNAPSHOT: // 3002 - 中金所行情快照
+        case ZC_MSG_CZCE_SNAPSHOT:  // 4002 - 郑商所行情快照
+        case ZC_MSG_DCE_SNAPSHOT:   // 5002 - 大商所行情快照
+        case ZC_MSG_SHFE_SNAPSHOT:  // 6002 - 上期所行情快照
+            return parseFutureData(pMsg, instrument);
 
-            // 期权
-            case ZC_MSG_SHOP_SNAPSHOT:    // 8002 - 上交所期权行情快照
-            case ZC_MSG_SZOP_SNAPSHOT:    // 11002 - 深交所期权行情快照
-                return parseOptionData(pMsg, instrument);
+        // 期权
+        case ZC_MSG_SHOP_SNAPSHOT: // 8002 - 上交所期权行情快照
+        case ZC_MSG_SZOP_SNAPSHOT: // 11002 - 深交所期权行情快照
+            return parseOptionData(pMsg, instrument);
 
-            // 港股
-            case ZC_MSG_HK_L1_SNAPSHOT:   // 9004 - 港股L1快照
-            case ZC_MSG_HK_L2_SNAPSHOT:   // 9001 - 港股L2快照
-                return parseHKData(pMsg, instrument);
+        // 港股
+        case ZC_MSG_HK_L1_SNAPSHOT: // 9004 - 港股L1快照
+        case ZC_MSG_HK_L2_SNAPSHOT: // 9001 - 港股L2快照
+            return parseHKData(pMsg, instrument);
 
-            default:
-                WTSLogger::warn("ParserZC unsupported message type {} for {}", msgType, instrument);
-                return nullptr;
+        default:
+            WTSLogger::warn("ParserZC unsupported message type {} for {}", msgType, instrument);
+            return nullptr;
         }
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         WTSLogger::error("ParserZC parseTickData exception: {}", e.what());
         return nullptr;
     }
 }
 
-std::string ParserZC::parseInstrumentCode(const char* tag_name)
+std::string ParserZC::parseInstrumentCode(const char *tag_name)
 {
-    if(tag_name == nullptr || strlen(tag_name) == 0)
+    if (tag_name == nullptr || strlen(tag_name) == 0)
         return "";
-        
+
     // sipsi2的标签格式通常为: 市场.代码.字段
     // 例如: SH.600000.last (上海600000的最新价)
     //       SHFE.cu2301.last (上期所铜2301合约的最新价)
-    
+
     std::string tagStr(tag_name);
     std::vector<std::string> parts = StrUtil::split(tagStr, ".");
-    
-    if(parts.size() < 3)
+
+    if (parts.size() < 3)
         return "";
-        
+
     std::string market = parts[0];
     std::string code = parts[1];
-    
+
     // 转换为WonderTrader标准格式: 代码.市场
-    if(market == "SH")
+    if (market == "SH")
         return code + ".SSE";
-    else if(market == "SZ")
+    else if (market == "SZ")
         return code + ".SZSE";
-    else if(market == "SHFE")
+    else if (market == "SHFE")
         return code + ".SHFE";
-    else if(market == "DCE")
+    else if (market == "DCE")
         return code + ".DCE";
-    else if(market == "CZCE")
+    else if (market == "CZCE")
         return code + ".CZCE";
-    else if(market == "CFFEX")
+    else if (market == "CFFEX")
         return code + ".CFFEX";
     else
         return code + "." + market;
 }
 
-std::string ParserZC::convertToSipTagName(const std::string& wtCode)
+std::string ParserZC::convertToSipTagName(const std::string &wtCode)
 {
-    // 将WonderTrader格式转换为sipsi2标签格式
-    // WonderTrader格式: 代码.交易所 (如: 600000.SSE, cu2301.SHFE)
-    // sipsi2格式: 交易所.代码.字段 (如: SH.600000.*, SHFE.cu2301.*)
-    
-    std::vector<std::string> parts = StrUtil::split(wtCode, ".");
-    if(parts.size() != 2)
-        return "";
-        
-    std::string code = parts[0];
-    std::string exchange = parts[1];
-    
-    std::string sipExchange;
-    if(exchange == "SSE")
-        sipExchange = "SH";
-    else if(exchange == "SZSE")
-        sipExchange = "SZ";
-    else if(exchange == "SHFE")
-        sipExchange = "SHFE";
-    else if(exchange == "DCE")
-        sipExchange = "DCE";
-    else if(exchange == "CZCE")
-        sipExchange = "CZCE";
-    else if(exchange == "CFFEX")
-        sipExchange = "CFFEX";
-    else
-        sipExchange = exchange;
-        
-    // 订阅所有字段，使用通配符
-    return sipExchange + "." + code + ".*";
+    // 默认使用L1数据类型
+    return convertWonderTraderToZCFormat(wtCode, "L1");
 }
 
-std::string ParserZC::extractMarketFromTag(const char* tag_name)
+std::string ParserZC::convertWonderTraderToZCFormat(const std::string &wtCode, const std::string &dataType)
 {
-    if(tag_name == nullptr)
+    // 将WonderTrader格式转换为中畅标签格式
+    // WonderTrader格式: 代码.交易所 (如: 600000.SSE, cu2301.SHFE)
+    // 中畅格式: 交易所.代码.数据类型 (如: SH.600000.L1, SHFE.cu2301.L1)
+
+    std::vector<std::string> parts = StrUtil::split(wtCode, ".");
+    if (parts.size() != 2)
         return "";
-        
+
+    std::string code = parts[0];
+    std::string wtExchange = parts[1];
+
+    // 转换交易所代码
+    std::string zcExchange = convertExchangeCode(wtExchange);
+    if (zcExchange.empty())
+        return "";
+
+    // 确定最终的数据类型
+    std::string finalDataType = determineFinalDataType(zcExchange, dataType);
+
+    // 构建中畅格式标签
+    return zcExchange + "." + code + "." + finalDataType;
+}
+
+std::string ParserZC::convertExchangeCode(const std::string &wtExchange)
+{
+    // WonderTrader交易所代码 -> 中畅交易所代码映射表
+    static const std::map<std::string, std::string> exchangeMap = {
+        {"SSE", "SH"},      // 上海证券交易所
+        {"SZSE", "SZ"},     // 深圳证券交易所
+        {"SHFE", "SHFE"},   // 上期所
+        {"DCE", "DCE"},     // 大商所
+        {"CZCE", "CZCE"},   // 郑商所
+        {"CFFEX", "CFFEX"}, // 中金所
+        {"SHOP", "SHOP"},   // 上交所期权
+        {"SZOP", "SZOP"},   // 深交所期权
+        {"HK", "HK"},       // 港股
+        {"ZZZS", "ZZZS"}    // 中证指数
+    };
+
+    auto it = exchangeMap.find(wtExchange);
+    return (it != exchangeMap.end()) ? it->second : "";
+}
+
+std::string ParserZC::determineFinalDataType(const std::string &zcExchange, const std::string &requestedType)
+{
+    // 根据中畅接入规范文档确定各市场支持的数据类型
+    if (zcExchange == "SH" || zcExchange == "SZ")
+    {
+        // 股票市场支持的数据类型
+        if (requestedType == "L1") return "L1";      // 5档快照 (消息类型1005/2005)
+        if (requestedType == "L2") return "L2";      // 10档快照 (消息类型1004/2004)
+        if (requestedType == "ZC") return "ZC";      // 逐笔成交 (消息类型1001/2001)
+        if (requestedType == "ZW") return "ZW";      // 逐笔委托 (消息类型2003)
+        if (requestedType == "WD") return "WD";      // 委托队列 (消息类型1002/2002)
+        if (requestedType == "ZK") return "ZK";      // 指数快照 (消息类型1000/2000)
+        return "L1"; // 默认使用L1
+    }
+    else if (zcExchange == "SHFE" || zcExchange == "DCE" ||
+             zcExchange == "CZCE" || zcExchange == "CFFEX")
+    {
+        // 期货市场支持的数据类型
+        if (requestedType == "L1") return "L1";      // 期货快照 (消息类型3002/4002/5002/6002)
+        if (requestedType == "JC") return "JC";      // 基础信息
+        return "L1"; // 默认使用L1
+    }
+    else if (zcExchange == "HK")
+    {
+        // 港股支持的数据类型
+        if (requestedType == "L1") return "L1";      // 5档快照 (消息类型9004)
+        if (requestedType == "L2") return "L2";      // 10档快照 (消息类型9001)
+        if (requestedType == "ZK") return "ZK";      // 指数
+        return "L1"; // 默认使用L1
+    }
+    else if (zcExchange == "SHOP" || zcExchange == "SZOP")
+    {
+        // 期权支持的数据类型
+        if (requestedType == "L1") return "L1";      // 期权快照 (消息类型8002/11002)
+        if (requestedType == "JC") return "JC";      // 基础信息
+        return "L1"; // 默认使用L1
+    }
+    else if (zcExchange == "ZZZS")
+    {
+        // 中证指数支持的数据类型
+        if (requestedType == "ZK") return "ZK";      // 指数快照 (消息类型7002)
+        if (requestedType == "ZJ") return "ZJ";      // 指数基金参考净值
+        return "ZK"; // 默认使用指数快照
+    }
+
+    // 未知市场，返回请求的类型或L1
+    return requestedType.empty() ? "L1" : requestedType;
+}
+
+std::string ParserZC::extractMarketFromTag(const char *tag_name)
+{
+    if (tag_name == nullptr)
+        return "";
+
     std::string tagStr(tag_name);
     auto pos = tagStr.find('.');
-    if(pos != std::string::npos)
+    if (pos != std::string::npos)
         return tagStr.substr(0, pos);
     else
         return "";
@@ -864,31 +970,31 @@ uint32_t ParserZC::getTradingDate()
     auto now = std::chrono::system_clock::now();
     auto time_t = std::chrono::system_clock::to_time_t(now);
     auto tm = *std::localtime(&time_t);
-    
+
     // 如果是凌晨时间(0-6点)，认为还是前一个交易日
-    if(tm.tm_hour < 6)
+    if (tm.tm_hour < 6)
     {
         time_t -= 24 * 3600; // 减去一天
         tm = *std::localtime(&time_t);
     }
-    
+
     return (tm.tm_year + 1900) * 10000 + (tm.tm_mon + 1) * 100 + tm.tm_mday;
 }
 
 //////////////////////////////////////////////////////////////////////////
 // 错误处理方法实现
 
-void ParserZC::logSipError(SIPRET ret, const char* operation)
+void ParserZC::logSipError(SIPRET ret, const char *operation)
 {
-    const char* errMsg = getErrorMessage(ret);
+    const char *errMsg = getErrorMessage(ret);
     WTSLogger::error("ParserZC {} failed: {} ({})", operation, errMsg, ret);
     m_uErrorCount++;
 }
 
-const char* ParserZC::getErrorMessage(int error_code)
+const char *ParserZC::getErrorMessage(int error_code)
 {
     auto it = m_mapErrorMessages.find(error_code);
-    if(it != m_mapErrorMessages.end())
+    if (it != m_mapErrorMessages.end())
         return it->second.c_str();
     else
         return "Unknown error";
@@ -944,12 +1050,12 @@ void ParserZC::initErrorMessages()
 
 void ParserZC::checkConnectionStatus()
 {
-    if(!isConnected())
+    if (!isConnected())
         return;
-        
+
     // 更新心跳时间
     m_uLastHeartbeat = TimeUtils::getLocalTimeNow();
-    
+
     // 这里可以添加连接健康检查逻辑
     // 例如发送心跳包、检查数据接收情况等
 }
@@ -957,20 +1063,20 @@ void ParserZC::checkConnectionStatus()
 //////////////////////////////////////////////////////////////////////////
 // 具体市场数据解析方法
 
-WTSTickData* ParserZC::parseStockL1Data(T_SIPTAGMSG* pMsg, const std::string& instrument)
+WTSTickData *ParserZC::parseStockL1Data(T_SIPTAGMSG *pMsg, const std::string &instrument)
 {
     // 解析股票L1快照数据 (消息类型1005, 2005)
     WTSLogger::debug("ParserZC parsing stock L1 data for {}", instrument);
 
     // 创建WTSTickData对象
-    WTSTickData* tick = WTSTickData::create(instrument.c_str());
-    if(tick == nullptr)
+    WTSTickData *tick = WTSTickData::create(instrument.c_str());
+    if (tick == nullptr)
         return nullptr;
 
     try
     {
         // 简化实现：设置基本的tick数据
-        WTSTickStruct& ts = tick->getTickStruct();
+        WTSTickStruct &ts = tick->getTickStruct();
 
         // 设置时间信息
         ts.action_date = getTradingDate();
@@ -978,18 +1084,18 @@ WTSTickData* ParserZC::parseStockL1Data(T_SIPTAGMSG* pMsg, const std::string& in
         ts.trading_date = getTradingDate();
 
         // 设置基本价格信息（这里使用示例数据，实际应该解析pMsg中的数据）
-        ts.price = 10.0;  // 最新价
-        ts.open = 9.8;    // 开盘价
-        ts.high = 10.2;   // 最高价
-        ts.low = 9.7;     // 最低价
+        ts.price = 10.0;    // 最新价
+        ts.open = 9.8;      // 开盘价
+        ts.high = 10.2;     // 最高价
+        ts.low = 9.7;       // 最低价
         ts.pre_close = 9.9; // 昨收价
 
         // 设置成交量和成交额
-        ts.total_volume = 1000000;  // 总成交量
+        ts.total_volume = 1000000;    // 总成交量
         ts.total_turnover = 10000000; // 总成交额
 
         // 设置买卖盘信息（5档）
-        for(int i = 0; i < 5; i++)
+        for (int i = 0; i < 5; i++)
         {
             ts.bid_prices[i] = ts.price - (i + 1) * 0.01;
             ts.bid_qty[i] = 1000 * (i + 1);
@@ -1001,10 +1107,10 @@ WTSTickData* ParserZC::parseStockL1Data(T_SIPTAGMSG* pMsg, const std::string& in
         m_uTickCount++;
 
         WTSLogger::debug("ParserZC parsed stock L1 tick: {} price={} volume={}",
-                        tick->code(), ts.price, ts.total_volume);
+                         tick->code(), ts.price, ts.total_volume);
         return tick;
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         WTSLogger::error("ParserZC parseStockL1Data exception: {}", e.what());
         tick->release();
@@ -1012,7 +1118,7 @@ WTSTickData* ParserZC::parseStockL1Data(T_SIPTAGMSG* pMsg, const std::string& in
     }
 }
 
-WTSTickData* ParserZC::parseStockL2Data(T_SIPTAGMSG* pMsg, const std::string& instrument)
+WTSTickData *ParserZC::parseStockL2Data(T_SIPTAGMSG *pMsg, const std::string &instrument)
 {
     // 解析股票L2快照数据 (消息类型1004, 2004)
     WTSLogger::debug("ParserZC parsing stock L2 data for {}", instrument);
@@ -1022,20 +1128,20 @@ WTSTickData* ParserZC::parseStockL2Data(T_SIPTAGMSG* pMsg, const std::string& in
     return nullptr;
 }
 
-WTSTickData* ParserZC::parseFutureData(T_SIPTAGMSG* pMsg, const std::string& instrument)
+WTSTickData *ParserZC::parseFutureData(T_SIPTAGMSG *pMsg, const std::string &instrument)
 {
     // 解析期货快照数据 (消息类型3002, 4002, 5002, 6002)
     WTSLogger::debug("ParserZC parsing future data for {}", instrument);
 
     // 创建WTSTickData对象
-    WTSTickData* tick = WTSTickData::create(instrument.c_str());
-    if(tick == nullptr)
+    WTSTickData *tick = WTSTickData::create(instrument.c_str());
+    if (tick == nullptr)
         return nullptr;
 
     try
     {
         // 简化实现：设置基本的期货tick数据
-        WTSTickStruct& ts = tick->getTickStruct();
+        WTSTickStruct &ts = tick->getTickStruct();
 
         // 设置时间信息
         ts.action_date = getTradingDate();
@@ -1043,18 +1149,18 @@ WTSTickData* ParserZC::parseFutureData(T_SIPTAGMSG* pMsg, const std::string& ins
         ts.trading_date = getTradingDate();
 
         // 设置基本价格信息（期货示例数据）
-        ts.price = 3000.0;    // 最新价
-        ts.open = 2980.0;     // 开盘价
-        ts.high = 3020.0;     // 最高价
-        ts.low = 2970.0;      // 最低价
+        ts.price = 3000.0;     // 最新价
+        ts.open = 2980.0;      // 开盘价
+        ts.high = 3020.0;      // 最高价
+        ts.low = 2970.0;       // 最低价
         ts.pre_close = 2990.0; // 昨收价
 
         // 设置成交量和成交额
-        ts.total_volume = 50000;     // 总成交量
+        ts.total_volume = 50000;       // 总成交量
         ts.total_turnover = 150000000; // 总成交额
 
         // 设置买卖盘信息
-        for(int i = 0; i < 5; i++)
+        for (int i = 0; i < 5; i++)
         {
             ts.bid_prices[i] = ts.price - (i + 1) * 1.0;
             ts.bid_qty[i] = 100 * (i + 1);
@@ -1066,10 +1172,10 @@ WTSTickData* ParserZC::parseFutureData(T_SIPTAGMSG* pMsg, const std::string& ins
         m_uTickCount++;
 
         WTSLogger::debug("ParserZC parsed future tick: {} price={} volume={}",
-                        tick->code(), ts.price, ts.total_volume);
+                         tick->code(), ts.price, ts.total_volume);
         return tick;
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         WTSLogger::error("ParserZC parseFutureData exception: {}", e.what());
         tick->release();
@@ -1077,7 +1183,7 @@ WTSTickData* ParserZC::parseFutureData(T_SIPTAGMSG* pMsg, const std::string& ins
     }
 }
 
-WTSTickData* ParserZC::parseTransactionData(T_SIPTAGMSG* pMsg, const std::string& instrument)
+WTSTickData *ParserZC::parseTransactionData(T_SIPTAGMSG *pMsg, const std::string &instrument)
 {
     // 解析逐笔成交数据 (消息类型1001, 2001)
     WTSLogger::debug("ParserZC parsing transaction data for {}", instrument);
@@ -1093,7 +1199,7 @@ WTSTickData* ParserZC::parseTransactionData(T_SIPTAGMSG* pMsg, const std::string
     return nullptr;
 }
 
-WTSTickData* ParserZC::parseOrderQueueData(T_SIPTAGMSG* pMsg, const std::string& instrument)
+WTSTickData *ParserZC::parseOrderQueueData(T_SIPTAGMSG *pMsg, const std::string &instrument)
 {
     // 解析委托队列数据 (消息类型1002, 2002)
     WTSLogger::debug("ParserZC parsing order queue data for {}", instrument);
@@ -1109,14 +1215,14 @@ WTSTickData* ParserZC::parseOrderQueueData(T_SIPTAGMSG* pMsg, const std::string&
     return nullptr;
 }
 
-WTSTickData* ParserZC::parseIndexData(T_SIPTAGMSG* pMsg, const std::string& instrument)
+WTSTickData *ParserZC::parseIndexData(T_SIPTAGMSG *pMsg, const std::string &instrument)
 {
     // 解析指数数据 (消息类型1000, 2000, 7002)
     WTSLogger::debug("ParserZC parsing index data for {}", instrument);
 
     // 创建WTSTickData对象
-    WTSTickData* tick = WTSTickData::create(instrument.c_str());
-    if(tick == nullptr)
+    WTSTickData *tick = WTSTickData::create(instrument.c_str());
+    if (tick == nullptr)
         return nullptr;
 
     // TODO: 根据ZhongChang接入规范实现具体的指数数据解析
@@ -1128,14 +1234,14 @@ WTSTickData* ParserZC::parseIndexData(T_SIPTAGMSG* pMsg, const std::string& inst
     return tick;
 }
 
-WTSTickData* ParserZC::parseOptionData(T_SIPTAGMSG* pMsg, const std::string& instrument)
+WTSTickData *ParserZC::parseOptionData(T_SIPTAGMSG *pMsg, const std::string &instrument)
 {
     // 解析期权数据 (消息类型8002, 11002)
     WTSLogger::debug("ParserZC parsing option data for {}", instrument);
 
     // 创建WTSTickData对象
-    WTSTickData* tick = WTSTickData::create(instrument.c_str());
-    if(tick == nullptr)
+    WTSTickData *tick = WTSTickData::create(instrument.c_str());
+    if (tick == nullptr)
         return nullptr;
 
     // TODO: 根据ZhongChang接入规范实现具体的期权数据解析
@@ -1147,14 +1253,14 @@ WTSTickData* ParserZC::parseOptionData(T_SIPTAGMSG* pMsg, const std::string& ins
     return tick;
 }
 
-WTSTickData* ParserZC::parseHKData(T_SIPTAGMSG* pMsg, const std::string& instrument)
+WTSTickData *ParserZC::parseHKData(T_SIPTAGMSG *pMsg, const std::string &instrument)
 {
     // 解析港股数据 (消息类型9001, 9004)
     WTSLogger::debug("ParserZC parsing HK data for {}", instrument);
 
     // 创建WTSTickData对象
-    WTSTickData* tick = WTSTickData::create(instrument.c_str());
-    if(tick == nullptr)
+    WTSTickData *tick = WTSTickData::create(instrument.c_str());
+    if (tick == nullptr)
         return nullptr;
 
     // TODO: 根据ZhongChang接入规范实现具体的港股数据解析
@@ -1192,7 +1298,7 @@ ZCPriceInfo ParserZC::convertZCPrice(T_U32 raw_price)
     // 检查价格是否有效
     priceInfo.is_valid = ZC_IS_VALID_PRICE(raw_price);
 
-    if(priceInfo.is_valid)
+    if (priceInfo.is_valid)
     {
         // 转换价格：ZhongChang使用4位小数的整数表示价格
         priceInfo.price = ZC_PRICE_TO_DOUBLE(raw_price);
@@ -1205,12 +1311,12 @@ ZCPriceInfo ParserZC::convertZCPrice(T_U32 raw_price)
     return priceInfo;
 }
 
-void ParserZC::setTickBasicInfo(WTSTickData* tick, const ZCTimeInfo& time_info, const std::string& instrument)
+void ParserZC::setTickBasicInfo(WTSTickData *tick, const ZCTimeInfo &time_info, const std::string &instrument)
 {
-    if(tick == nullptr)
+    if (tick == nullptr)
         return;
 
-    WTSTickStruct& ts = tick->getTickStruct();
+    WTSTickStruct &ts = tick->getTickStruct();
 
     // 设置时间信息
     ts.action_date = time_info.action_date;
@@ -1221,35 +1327,43 @@ void ParserZC::setTickBasicInfo(WTSTickData* tick, const ZCTimeInfo& time_info, 
     m_uTickCount++;
 
     WTSLogger::debug("ParserZC setTickBasicInfo: {} date={} time={}",
-                    instrument, ts.action_date, ts.action_time);
+                     instrument, ts.action_date, ts.action_time);
 }
 
 bool ParserZC::doConnect()
 {
-    if(m_hSipHandle == INVALID_SIPHANDLE)
+    if (m_hSipHandle == INVALID_SIPHANDLE)
     {
         WTSLogger::error("ParserZC doConnect failed: invalid handle");
         return false;
     }
-    
+
     m_connectionStatus = ZC_CS_CONNECTING;
-    
+
     SIPRET ret = UI_Connect(m_hSipHandle,
-                           m_configInfo.server_ip.c_str(),
-                           m_configInfo.server_port,
-                           m_configInfo.user_id.c_str(),
-                           m_configInfo.password.c_str(),
-                           m_configInfo.login_mode,
-                           m_configInfo.async_connect);
-    
-    if(ret == SIPE_OK)
+                            m_configInfo.server_ip.c_str(),
+                            m_configInfo.server_port,
+                            m_configInfo.user_id.c_str(),
+                            m_configInfo.password.c_str(),
+                            m_configInfo.login_mode,
+                            m_configInfo.async_connect);
+
+    if (ret == SIPE_OK)
     {
-        if(!m_configInfo.async_connect)
+        // 验证连接状态（参考demo实现）
+        if (!UI_IsConnect(m_hSipHandle))
+        {
+            WTSLogger::error("ParserZC doConnect: UI_IsConnect verification failed");
+            m_connectionStatus = ZC_CS_ERROR;
+            return false;
+        }
+
+        if (!m_configInfo.async_connect)
         {
             m_connectionStatus = ZC_CS_LOGGEDIN;
             WTSLogger::info("ParserZC connected successfully (sync mode)");
-            
-            if(m_pSpi)
+
+            if (m_pSpi)
             {
                 m_pSpi->handleEvent(WPE_Connect, 0);
             }
@@ -1270,18 +1384,18 @@ bool ParserZC::doConnect()
 
 void ParserZC::doDisconnect()
 {
-    if(m_hSipHandle != INVALID_SIPHANDLE)
+    if (m_hSipHandle != INVALID_SIPHANDLE)
     {
         // 取消所有订阅
         UI_UnSubscribeAll(m_hSipHandle);
-        
+
         // 断开连接
         UI_Disconnect(m_hSipHandle);
-        
+
         m_connectionStatus = ZC_CS_DISCONNECTED;
         WTSLogger::info("ParserZC disconnected");
-        
-        if(m_pSpi)
+
+        if (m_pSpi)
         {
             m_pSpi->handleEvent(WPE_Close, 0);
         }
@@ -1291,19 +1405,19 @@ void ParserZC::doDisconnect()
 // 导出函数实现
 extern "C"
 {
-    EXPORT_FLAG IParserApi* createParser()
+    EXPORT_FLAG IParserApi *createParser()
     {
-        ParserZC* parser = new ParserZC();
+        ParserZC *parser = new ParserZC();
         return parser;
     }
-    
-    EXPORT_FLAG void deleteParser(IParserApi* &parser)
+
+    EXPORT_FLAG void deleteParser(IParserApi *&parser)
     {
-        if(parser != nullptr)
+        if (parser != nullptr)
         {
             parser->release();
             delete parser;
             parser = nullptr;
         }
     }
-} 
+}

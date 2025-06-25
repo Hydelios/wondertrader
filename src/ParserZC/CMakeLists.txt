@@ -12,7 +12,7 @@ ELSE (GNUCC)
 	IF(WIN32)
 		SET (MyDeps $ENV{MyDependsGcc})
 	ELSE(UNIX)
-		SET (MyDeps "/root/trading_sys/wondertrader/3rd/mydeps_gcc8.4.0/mydeps")
+		SET (MyDeps "/root/trading_sys/wondertrader/3rd/mydeps_gcc8.4.0")
 	ENDIF()
 
 	SET(INCS ${MyDeps}/include)
@@ -34,7 +34,10 @@ SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE
 
 # 包含目录
 INCLUDE_DIRECTORIES(${INCS})
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/../Includes)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/../Share)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/../API/sipsi2Api/inc)
+INCLUDE_DIRECTORIES(/root/trading_sys/wondertrader/3rd/mydeps_gcc8.4.0/include)
 LINK_DIRECTORIES(${LNKS})
 
 # 创建动态库
@@ -61,11 +64,11 @@ ELSE (GNUCC)
 	# 链接sipsi2Api库 (Linux)
 	IF(EXISTS "${PROJECT_SOURCE_DIR}/../API/sipsi2Api/linux64")
 		# 查找sipsi2动态库
-		FIND_LIBRARY(SIPSI2_LIB 
-			NAMES sipsi2 libsipsi2 sipsi2Api libsipsi2Api
+		FIND_LIBRARY(SIPSI2_LIB
+			NAMES sipui2x64 libsipui2x64
 			PATHS ${PROJECT_SOURCE_DIR}/../API/sipsi2Api/linux64
 			NO_DEFAULT_PATH)
-		
+
 		IF(SIPSI2_LIB)
 			TARGET_LINK_LIBRARIES(ParserZC ${SIPSI2_LIB})
 			MESSAGE(STATUS "Found sipsi2 library: ${SIPSI2_LIB}")
@@ -78,8 +81,12 @@ ELSE (GNUCC)
 	SET_TARGET_PROPERTIES(ParserZC PROPERTIES
 		CXX_VISIBILITY_PRESET hidden
 		C_VISIBILITY_PRESET hidden
-		VISIBILITY_INLINES_HIDDEN 1
-        LINK_FLAGS_RELEASE -s)
+		VISIBILITY_INLINES_HIDDEN 1)
+
+	# 只在Release模式下strip符号，Debug模式保留调试符号
+	IF(CMAKE_BUILD_TYPE STREQUAL "Release")
+		SET_TARGET_PROPERTIES(ParserZC PROPERTIES LINK_FLAGS -s)
+	ENDIF()
 ENDIF()
 
 # 编译选项

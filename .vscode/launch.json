@@ -2,45 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "🚀 调试 STP 项目",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/project/stp/build/test_stp_debug",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/project/stp",
-            "environment": [
-                {
-                    "name": "LD_LIBRARY_PATH",
-                    "value": "${workspaceFolder}/project/stp/libs:${workspaceFolder}/project/stp:${workspaceFolder}/src/build_all/build_x64/Release/bin:$LD_LIBRARY_PATH"
-                }
-            ],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "为 gdb 启用整齐打印",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                },
-                {
-                    "description": "将反汇编风格设置为 Intel",
-                    "text": "-gdb-set disassembly-flavor intel",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "编译 STP 项目",
-            "miDebuggerPath": "/usr/bin/gdb",
-            "logging": {
-                "moduleLoad": false,
-                "trace": false,
-                "engineLogging": false,
-                "programOutput": true,
-                "exceptions": true
-            }
-        },
-        {
-            "name": "🚀 调试 SIPUI 项目 (中畅解析器)",
+            "name": "Debug SIPUI - test_parser_zc",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/project/sipui/bin/test_parser_zc",
@@ -50,95 +12,87 @@
             "environment": [
                 {
                     "name": "LD_LIBRARY_PATH",
-                    "value": "${workspaceFolder}/project/sipui/libs:${workspaceFolder}/project/sipui:${workspaceFolder}/src/build_all/build_x64/Release/bin:$LD_LIBRARY_PATH"
+                    "value": "${workspaceFolder}/project/sipui/libs:${workspaceFolder}/3rd/mydeps_gcc8.4.0/lib:$LD_LIBRARY_PATH"
                 }
             ],
             "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [
                 {
-                    "description": "为 gdb 启用整齐打印",
+                    "description": "Enable pretty-printing for gdb",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 },
                 {
-                    "description": "将反汇编风格设置为 Intel",
+                    "description": "Set Disassembly Flavor to Intel",
                     "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "编译 SIPUI 项目",
+            "preLaunchTask": "Build SIPUI Debug",
             "miDebuggerPath": "/usr/bin/gdb",
             "logging": {
-                "moduleLoad": false,
-                "trace": false,
-                "engineLogging": false,
+                "engineLogging": true,
                 "programOutput": true,
-                "exceptions": true
+                "trace": true,
+                "traceResponse": true
+            },
+            "sourceFileMap": {
+                "/root/trading_sys/wondertrader": "${workspaceFolder}"
             }
         },
         {
-            "name": "🔧 调试 TraderSTP (兼容旧版)",
+            "name": "Debug SIPUI - test_parser_zc (No Build)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/project/stp/build/test_stp_debug",
+            "program": "${workspaceFolder}/project/sipui/bin/test_parser_zc",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/project/stp",
+            "cwd": "${workspaceFolder}/project/sipui",
             "environment": [
                 {
                     "name": "LD_LIBRARY_PATH",
-                    "value": "${workspaceFolder}/project/stp:${workspaceFolder}/project/stp/libs:${workspaceFolder}/src/build_all/build_x64/Release/bin:$LD_LIBRARY_PATH"
+                    "value": "${workspaceFolder}/project/sipui/libs:${workspaceFolder}/3rd/mydeps_gcc8.4.0/lib:$LD_LIBRARY_PATH"
                 }
             ],
             "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [
                 {
-                    "description": "为 gdb 启用整齐打印",
+                    "description": "Enable pretty-printing for gdb",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 },
                 {
-                    "description": "将反汇编风格设置为 Intel",
+                    "description": "Set Disassembly Flavor to Intel",
                     "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "编译 STP 项目",
             "miDebuggerPath": "/usr/bin/gdb",
             "logging": {
-                "moduleLoad": false,
-                "trace": false,
                 "engineLogging": false,
                 "programOutput": true,
-                "exceptions": true
+                "trace": false
+            },
+            "sourceFileMap": {
+                "/root/trading_sys/wondertrader": "${workspaceFolder}"
             }
         },
         {
-            "name": "🔧 调试 TestTraderSTP (原版)",
+            "name": "Debug SIPUI - Attach to Process",
             "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/build_all/build_x64/Release/bin/TestTraderSTP/TestTraderSTP",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/project/stp",
-            "environment": [
-                {
-                    "name": "LD_LIBRARY_PATH",
-                    "value": "${workspaceFolder}/project/stp/libs:${workspaceFolder}/src/build_all/build_x64/Release/bin:$LD_LIBRARY_PATH"
-                }
-            ],
-            "externalConsole": false,
+            "request": "attach",
+            "program": "${workspaceFolder}/project/sipui/bin/test_parser_zc",
+            "processId": "${command:pickProcess}",
             "MIMode": "gdb",
             "setupCommands": [
                 {
-                    "description": "为 gdb 启用整齐打印",
+                    "description": "Enable pretty-printing for gdb",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "编译所有项目",
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]

@@ -174,9 +174,32 @@ private:
     /*!
      * \brief 将WonderTrader格式代码转换为sipsi2标签格式
      * \param wtCode WonderTrader格式的合约代码
-     * \return sipsi2标签格式
+     * \return sipsi2标签格式（默认使用L1数据类型）
      */
     std::string convertToSipTagName(const std::string &wtCode);
+
+    /*!
+     * \brief 将WonderTrader格式代码转换为指定数据类型的中畅格式
+     * \param wtCode WonderTrader格式的合约代码 (如: 600000.SSE)
+     * \param dataType 数据类型 (如: L1, L2, ZC, WD等)
+     * \return 中畅格式标签 (如: SH.600000.L1)
+     */
+    std::string convertWonderTraderToZCFormat(const std::string &wtCode, const std::string &dataType);
+
+    /*!
+     * \brief 转换交易所代码从WonderTrader格式到中畅格式
+     * \param wtExchange WonderTrader交易所代码 (如: SSE, SZSE, SHFE等)
+     * \return 中畅交易所代码 (如: SH, SZ, SHFE等)
+     */
+    std::string convertExchangeCode(const std::string &wtExchange);
+
+    /*!
+     * \brief 根据交易所确定支持的数据类型
+     * \param zcExchange 中畅交易所代码
+     * \param requestedType 请求的数据类型
+     * \return 实际支持的数据类型
+     */
+    std::string determineFinalDataType(const std::string &zcExchange, const std::string &requestedType);
 
     /*!
      * \brief 从标签名中提取市场代码

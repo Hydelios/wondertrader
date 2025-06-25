@@ -1,0 +1,102 @@
+{
+    "folders": [
+        {
+            "name": "WonderTrader",
+            "path": "."
+        },
+        {
+            "name": "SIPUI Project",
+            "path": "./project/sipui"
+        },
+        {
+            "name": "ParserZC Source",
+            "path": "./src/ParserZC"
+        }
+    ],
+    "settings": {
+        "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+        "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
+        "C_Cpp.default.compilerPath": "/usr/bin/gcc",
+        "C_Cpp.default.cStandard": "c11",
+        "C_Cpp.default.cppStandard": "c++17",
+        "cmake.buildDirectory": "${workspaceFolder}/project/sipui/build",
+        "cmake.sourceDirectory": "${workspaceFolder}/project/sipui",
+        "cmake.configureOnOpen": false,
+        "cmake.buildBeforeRun": true,
+        "terminal.integrated.cwd": "${workspaceFolder}",
+        "files.associations": {
+            "*.h": "c",
+            "*.hpp": "cpp",
+            "*.cpp": "cpp",
+            "*.c": "c",
+            "*.yaml": "yaml",
+            "*.yml": "yaml"
+        },
+        "search.exclude": {
+            "**/build/**": true,
+            "**/cmake-build-*/**": true,
+            "**/dist/**": true,
+            "**/.git/**": true,
+            "**/tmp/**": true
+        }
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "Debug SIPUI",
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceFolder}/project/sipui/bin/test_parser_zc",
+                "args": [],
+                "stopAtEntry": false,
+                "cwd": "${workspaceFolder}/project/sipui",
+                "environment": [
+                    {
+                        "name": "LD_LIBRARY_PATH",
+                        "value": "${workspaceFolder}/project/sipui/libs:${workspaceFolder}/3rd/mydeps_gcc8.4.0/lib:$LD_LIBRARY_PATH"
+                    }
+                ],
+                "externalConsole": false,
+                "MIMode": "gdb",
+                "setupCommands": [
+                    {
+                        "description": "Enable pretty-printing for gdb",
+                        "text": "-enable-pretty-printing",
+                        "ignoreFailures": true
+                    }
+                ],
+                "preLaunchTask": "Build SIPUI Debug",
+                "miDebuggerPath": "/usr/bin/gdb"
+            }
+        ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "Build SIPUI Debug",
+                "type": "shell",
+                "command": "bash",
+                "args": [
+                    "-c",
+                    "cd build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make -j4"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder}/project/sipui"
+                },
+                "group": {
+                    "kind": "build",
+                    "isDefault": true
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": false,
+                    "panel": "shared"
+                },
+                "problemMatcher": ["$gcc"]
+            }
+        ]
+    }
+}
