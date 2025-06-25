@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 
     try
     {
-        WTSLogger::init("logcfg.yaml", true);
+        WTSLogger::init("config/logcfg.yaml", true);
         WTSLogger::info("ParserZC测试程序启动");
 
         // 创建ParserZC实例

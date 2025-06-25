@@ -1,0 +1,82 @@
+# SIPUI项目日志配置文件
+# 基于WonderTrader标准日志配置格式
+
+# 动态日志配置 - 支持不同模块的独立日志级别
+dyn_pattern:
+    # ParserZC解析器日志配置
+    parser:
+        async: false
+        level: debug                    # 设置为debug级别以查看详细信息
+        sinks:
+        -   filename: Logs/Parser/%s.log
+            pattern: '[%Y.%m.%d %H:%M:%S - %-5l] %v'
+            truncate: true
+            type: daily_file_sink
+        -   pattern: '[%m.%d %H:%M:%S - %-5l] %v'
+            type: ostream_sink          # 同时输出到控制台
+    
+    # 策略日志配置
+    strategy:
+        async: false
+        level: debug
+        sinks:
+        -   filename: Logs/Strategy/%s.log
+            pattern: '[%Y.%m.%d %H:%M:%S - %-5l] %v'
+            truncate: true
+            type: daily_file_sink
+    
+    # 交易日志配置
+    trader:
+        async: false
+        level: debug
+        sinks:
+        -   filename: Logs/Trader/%s.log
+            pattern: '[%Y.%m.%d %H:%M:%S - %-5l] %v'
+            truncate: true
+            type: daily_file_sink
+    
+    # 执行器日志配置
+    executer:
+        async: false
+        level: debug
+        sinks:
+        -   filename: Logs/Executer/%s.log
+            pattern: '[%Y.%m.%d %H:%M:%S - %-5l] %v'
+            truncate: true
+            type: daily_file_sink
+
+# 风险监控日志配置
+risk:
+    async: false
+    level: debug
+    sinks:
+    -   filename: Logs/Riskmon/Riskmon.log
+        pattern: '[%Y.%m.%d %H:%M:%S - %-5l] %v'
+        truncate: true
+        type: daily_file_sink
+
+# 根日志配置 - 默认日志级别
+root:
+    async: false
+    level: debug                        # 设置为debug级别
+    sinks:
+    -   filename: Logs/SIPUI.log
+        pattern: '[%Y.%m.%d %H:%M:%S - %-5l] %v'
+        truncate: true
+        type: daily_file_sink
+    -   pattern: '[%m.%d %H:%M:%S - %-5l] %v'
+        type: ostream_sink              # 输出到控制台
+
+# 日志级别说明：
+# - trace: 最详细的调试信息
+# - debug: 调试信息（推荐用于开发调试）
+# - info: 一般信息
+# - warn: 警告信息
+# - error: 错误信息
+# - critical: 严重错误信息
+
+# 日志输出类型说明：
+# - daily_file_sink: 按日期滚动的文件输出
+# - ostream_sink: 控制台输出
+# - async: 是否异步写入（false=同步，true=异步）
+# - truncate: 是否截断现有日志文件（true=覆盖，false=追加）

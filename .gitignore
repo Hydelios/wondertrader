@@ -9,3 +9,4 @@ project/stp/libs/*
 cmake-build-*/
 *.gdb
 *.db*
+*.log
