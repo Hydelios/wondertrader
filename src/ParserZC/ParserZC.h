@@ -202,6 +202,13 @@ private:
     std::string determineFinalDataType(const std::string &zcExchange, const std::string &requestedType);
 
     /*!
+     * \brief 检查价格值是否有效，处理异常值
+     * \param val 待检查的价格值
+     * \return 有效的价格值，无效时返回0.0
+     */
+    double checkValid(double val);
+
+    /*!
      * \brief 从标签名中提取市场代码
      * \param tag_name sipsi2标签名
      * \return 市场代码
@@ -280,12 +287,7 @@ private:
      */
     ZCTimeInfo convertZCTime(T_I32 action_day, T_I32 time_stamp);
 
-    /*!
-     * \brief 转换ZhongChang价格格式
-     * \param raw_price 原始价格(4位小数)
-     * \return ZCPriceInfo结构
-     */
-    ZCPriceInfo convertZCPrice(T_U32 raw_price);
+
 
     /*!
      * \brief 设置Tick数据的基本信息

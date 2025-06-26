@@ -950,6 +950,14 @@ std::string ParserZC::determineFinalDataType(const std::string &zcExchange, cons
     return requestedType.empty() ? "L1" : requestedType;
 }
 
+double ParserZC::checkValid(double val)
+{
+    // 与其他Parser保持完全一致的处理方式
+    if (val == DBL_MAX || val == FLT_MAX)
+        return 0;
+    return val;
+}
+
 std::string ParserZC::extractMarketFromTag(const char *tag_name)
 {
     if (tag_name == nullptr)
@@ -1075,39 +1083,75 @@ WTSTickData *ParserZC::parseStockL1Data(T_SIPTAGMSG *pMsg, const std::string &in
 
     try
     {
-        // 简化实现：设置基本的tick数据
+        // 检查消息数据有效性
+        if (pMsg == nullptr || pMsg->MsgData == nullptr)
+        {
+            WTSLogger::error("ParserZC parseStockL1Data: invalid message data");
+            tick->release();
+            return nullptr;
+        }
+
+        // 将消息数据转换为股票L1结构
+        T_SH_StockMarketDataL1 *pL1Data = (T_SH_StockMarketDataL1 *)pMsg->MsgData;
         WTSTickStruct &ts = tick->getTickStruct();
 
         // 设置时间信息
-        ts.action_date = getTradingDate();
-        ts.action_time = TimeUtils::getLocalTimeNow() % 1000000000 / 1000; // 转换为HHMMSSmmm格式
+        ts.action_date = pL1Data->nActionDay;
+        ts.action_time = pL1Data->nTime;
         ts.trading_date = getTradingDate();
 
-        // 设置基本价格信息（这里使用示例数据，实际应该解析pMsg中的数据）
-        ts.price = 10.0;    // 最新价
-        ts.open = 9.8;      // 开盘价
-        ts.high = 10.2;     // 最高价
-        ts.low = 9.7;       // 最低价
-        ts.pre_close = 9.9; // 昨收价
+        // 设置价格信息，使用checkValid处理异常值
+        ts.price = checkValid(ZC_PRICE_TO_DOUBLE(pL1Data->uMatch));           // 最新价
+        ts.open = checkValid(ZC_PRICE_TO_DOUBLE(pL1Data->uOpen));             // 开盘价
+        ts.high = checkValid(ZC_PRICE_TO_DOUBLE(pL1Data->uHigh));             // 最高价
+        ts.low = checkValid(ZC_PRICE_TO_DOUBLE(pL1Data->uLow));               // 最低价
+        ts.pre_close = checkValid(ZC_PRICE_TO_DOUBLE(pL1Data->uPreClose));    // 昨收价
+        ts.upper_limit = checkValid(ZC_PRICE_TO_DOUBLE(pL1Data->uHighLimited)); // 涨停价
+        ts.lower_limit = checkValid(ZC_PRICE_TO_DOUBLE(pL1Data->uLowLimited));  // 跌停价
 
-        // 设置成交量和成交额
-        ts.total_volume = 1000000;    // 总成交量
-        ts.total_turnover = 10000000; // 总成交额
+        // 设置成交量信息
+        ts.total_volume = (double)pL1Data->iVolume;           // 总成交量
+        ts.volume = 0;                                        // 当前成交量(L1数据中没有)
+        ts.total_turnover = (double)pL1Data->iTurnover / 10000.0; // 总成交额(分转元)
+        ts.turn_over = 0.0;                                   // 当前成交额
+
+        // 股票没有持仓概念
+        ts.open_interest = 0;
+        ts.diff_interest = 0;
+        ts.pre_interest = 0;
+        ts.settle_price = 0;
+        ts.pre_settle = 0;
 
         // 设置买卖盘信息（5档）
         for (int i = 0; i < 5; i++)
         {
-            ts.bid_prices[i] = ts.price - (i + 1) * 0.01;
-            ts.bid_qty[i] = 1000 * (i + 1);
-            ts.ask_prices[i] = ts.price + (i + 1) * 0.01;
-            ts.ask_qty[i] = 1000 * (i + 1);
+            ts.bid_prices[i] = checkValid(ZC_PRICE_TO_DOUBLE(pL1Data->uBidPrice[i])); // 买价
+            ts.ask_prices[i] = checkValid(ZC_PRICE_TO_DOUBLE(pL1Data->uAskPrice[i])); // 卖价
+            ts.bid_qty[i] = (double)pL1Data->uBidVol[i];                              // 买量
+            ts.ask_qty[i] = (double)pL1Data->uAskVol[i];                              // 卖量
+        }
+
+        // 清空剩余档位
+        for (int i = 5; i < 10; i++)
+        {
+            ts.bid_prices[i] = 0;
+            ts.ask_prices[i] = 0;
+            ts.bid_qty[i] = 0;
+            ts.ask_qty[i] = 0;
         }
 
         // 增加tick计数
         m_uTickCount++;
 
-        WTSLogger::debug("ParserZC parsed stock L1 tick: {} price={} volume={}",
-                         tick->code(), ts.price, ts.total_volume);
+        // 详细调试信息
+        WTSLogger::debug("ParserZC parsed stock L1 tick: {} price={:.4f} volume={} time={} status={}",
+                         tick->code(), ts.price, ts.total_volume, ts.action_time, pL1Data->nStatus);
+
+        // 打印买卖盘信息用于调试
+        WTSLogger::debug("ParserZC L1 bid/ask: bid1={:.4f}({}) ask1={:.4f}({})",
+                         ts.bid_prices[0], (uint64_t)ts.bid_qty[0],
+                         ts.ask_prices[0], (uint64_t)ts.ask_qty[0]);
+
         return tick;
     }
     catch (const std::exception &e)
@@ -1123,9 +1167,79 @@ WTSTickData *ParserZC::parseStockL2Data(T_SIPTAGMSG *pMsg, const std::string &in
     // 解析股票L2快照数据 (消息类型1004, 2004)
     WTSLogger::debug("ParserZC parsing stock L2 data for {}", instrument);
 
-    // 暂时返回nullptr，表示L2数据解析尚未实现
-    WTSLogger::warn("ParserZC L2 data parsing not implemented yet for {}", instrument);
-    return nullptr;
+    if (pMsg == nullptr || pMsg->MsgData == nullptr)
+    {
+        WTSLogger::error("ParserZC parseStockL2Data: invalid message data");
+        return nullptr;
+    }
+
+    // 创建WTSTickData对象
+    WTSTickData *tick = WTSTickData::create(instrument.c_str());
+    if (tick == nullptr)
+        return nullptr;
+
+    try
+    {
+        // 将消息数据转换为股票L2结构
+        T_SH_StockMarketDataL2 *pL2Data = (T_SH_StockMarketDataL2 *)pMsg->MsgData;
+        WTSTickStruct &ts = tick->getTickStruct();
+
+        // 设置时间信息
+        ts.action_date = pL2Data->nActionDay;
+        ts.action_time = pL2Data->nTime;
+        ts.trading_date = getTradingDate();
+
+        // 设置价格信息，使用checkValid处理异常值
+        ts.price = checkValid(ZC_PRICE_TO_DOUBLE(pL2Data->uMatch));           // 最新价
+        ts.open = checkValid(ZC_PRICE_TO_DOUBLE(pL2Data->uOpen));             // 开盘价
+        ts.high = checkValid(ZC_PRICE_TO_DOUBLE(pL2Data->uHigh));             // 最高价
+        ts.low = checkValid(ZC_PRICE_TO_DOUBLE(pL2Data->uLow));               // 最低价
+        ts.pre_close = checkValid(ZC_PRICE_TO_DOUBLE(pL2Data->uPreClose));    // 昨收价
+        ts.upper_limit = checkValid(ZC_PRICE_TO_DOUBLE(pL2Data->uHighLimited)); // 涨停价
+        ts.lower_limit = checkValid(ZC_PRICE_TO_DOUBLE(pL2Data->uLowLimited));  // 跌停价
+
+        // 设置成交量信息
+        ts.total_volume = (double)pL2Data->iVolume;           // 总成交量
+        ts.volume = 0;                                        // 当前成交量
+        ts.total_turnover = (double)pL2Data->iTurnover / 10000.0; // 总成交额(分转元)
+        ts.turn_over = 0.0;                                   // 当前成交额
+
+        // 股票没有持仓概念
+        ts.open_interest = 0;
+        ts.diff_interest = 0;
+        ts.pre_interest = 0;
+        ts.settle_price = 0;
+        ts.pre_settle = 0;
+
+        // 设置买卖盘信息（10档）
+        for (int i = 0; i < 10; i++)
+        {
+            ts.bid_prices[i] = checkValid(ZC_PRICE_TO_DOUBLE(pL2Data->uBidPrice[i])); // 买价
+            ts.ask_prices[i] = checkValid(ZC_PRICE_TO_DOUBLE(pL2Data->uAskPrice[i])); // 卖价
+            ts.bid_qty[i] = (double)pL2Data->uBidVol[i];                              // 买量
+            ts.ask_qty[i] = (double)pL2Data->uAskVol[i];                              // 卖量
+        }
+
+        // 增加tick计数
+        m_uTickCount++;
+
+        // 详细调试信息
+        WTSLogger::debug("ParserZC parsed stock L2 tick: {} price={:.4f} volume={} time={} status={}",
+                         tick->code(), ts.price, ts.total_volume, ts.action_time, pL2Data->nStatus);
+
+        // 打印买卖盘信息用于调试
+        WTSLogger::debug("ParserZC L2 bid/ask: bid1={:.4f}({}) ask1={:.4f}({})",
+                         ts.bid_prices[0], (uint64_t)ts.bid_qty[0],
+                         ts.ask_prices[0], (uint64_t)ts.ask_qty[0]);
+
+        return tick;
+    }
+    catch (const std::exception &e)
+    {
+        WTSLogger::error("ParserZC parseStockL2Data exception: {}", e.what());
+        tick->release();
+        return nullptr;
+    }
 }
 
 WTSTickData *ParserZC::parseFutureData(T_SIPTAGMSG *pMsg, const std::string &instrument)
@@ -1140,39 +1254,78 @@ WTSTickData *ParserZC::parseFutureData(T_SIPTAGMSG *pMsg, const std::string &ins
 
     try
     {
-        // 简化实现：设置基本的期货tick数据
+        // 检查消息数据有效性
+        if (pMsg == nullptr || pMsg->MsgData == nullptr)
+        {
+            WTSLogger::error("ParserZC parseFutureData: invalid message data");
+            tick->release();
+            return nullptr;
+        }
+
+        // 将消息数据转换为期货结构
+        T_SHFE_FutursMarketData *pFutureData = (T_SHFE_FutursMarketData *)pMsg->MsgData;
         WTSTickStruct &ts = tick->getTickStruct();
 
         // 设置时间信息
-        ts.action_date = getTradingDate();
-        ts.action_time = TimeUtils::getLocalTimeNow() % 1000000000 / 1000;
-        ts.trading_date = getTradingDate();
+        ts.action_date = pFutureData->nActionDay;
+        ts.action_time = pFutureData->nTime;
+        ts.trading_date = pFutureData->nTradingDay;
 
-        // 设置基本价格信息（期货示例数据）
-        ts.price = 3000.0;     // 最新价
-        ts.open = 2980.0;      // 开盘价
-        ts.high = 3020.0;      // 最高价
-        ts.low = 2970.0;       // 最低价
-        ts.pre_close = 2990.0; // 昨收价
+        // 设置价格信息，使用checkValid处理异常值
+        ts.price = checkValid(ZC_PRICE_TO_DOUBLE(pFutureData->uMatch));           // 最新价
+        ts.open = checkValid(ZC_PRICE_TO_DOUBLE(pFutureData->uOpen));             // 开盘价
+        ts.high = checkValid(ZC_PRICE_TO_DOUBLE(pFutureData->uHigh));             // 最高价
+        ts.low = checkValid(ZC_PRICE_TO_DOUBLE(pFutureData->uLow));               // 最低价
+        ts.pre_close = checkValid(ZC_PRICE_TO_DOUBLE(pFutureData->uPreClose));    // 昨收价
+        ts.upper_limit = checkValid(ZC_PRICE_TO_DOUBLE(pFutureData->uHighLimited)); // 涨停价
+        ts.lower_limit = checkValid(ZC_PRICE_TO_DOUBLE(pFutureData->uLowLimited));  // 跌停价
 
-        // 设置成交量和成交额
-        ts.total_volume = 50000;       // 总成交量
-        ts.total_turnover = 150000000; // 总成交额
+        // 设置结算价信息，与其他Parser保持一致的处理方式
+        ts.settle_price = checkValid(ZC_PRICE_TO_DOUBLE(pFutureData->uSettlePrice));    // 今结算价
+        ts.pre_settle = checkValid(ZC_PRICE_TO_DOUBLE(pFutureData->uPreSettlePrice));   // 昨结算价
 
-        // 设置买卖盘信息
+        // 设置成交量信息
+        ts.total_volume = (double)pFutureData->iVolume;           // 总成交量
+        ts.volume = 0;                                            // 当前成交量
+        ts.total_turnover = (double)pFutureData->iTurnover / 10000.0; // 总成交额(分转元)
+        ts.turn_over = 0.0;                                       // 当前成交额
+
+        // 设置持仓信息
+        ts.open_interest = (double)pFutureData->iOpenInterest;    // 总持仓
+        ts.pre_interest = (double)pFutureData->iPreOpenInterest;  // 昨持仓
+        ts.diff_interest = ts.open_interest - ts.pre_interest;    // 增仓
+
+        // 设置买卖盘信息（5档）
         for (int i = 0; i < 5; i++)
         {
-            ts.bid_prices[i] = ts.price - (i + 1) * 1.0;
-            ts.bid_qty[i] = 100 * (i + 1);
-            ts.ask_prices[i] = ts.price + (i + 1) * 1.0;
-            ts.ask_qty[i] = 100 * (i + 1);
+            ts.bid_prices[i] = checkValid(ZC_PRICE_TO_DOUBLE(pFutureData->uBidPrice[i])); // 买价
+            ts.ask_prices[i] = checkValid(ZC_PRICE_TO_DOUBLE(pFutureData->uAskPrice[i])); // 卖价
+            ts.bid_qty[i] = (double)pFutureData->uBidVol[i];                              // 买量
+            ts.ask_qty[i] = (double)pFutureData->uAskVol[i];                              // 卖量
+        }
+
+        // 清空剩余档位
+        for (int i = 5; i < 10; i++)
+        {
+            ts.bid_prices[i] = 0;
+            ts.ask_prices[i] = 0;
+            ts.bid_qty[i] = 0;
+            ts.ask_qty[i] = 0;
         }
 
         // 增加tick计数
         m_uTickCount++;
 
-        WTSLogger::debug("ParserZC parsed future tick: {} price={} volume={}",
-                         tick->code(), ts.price, ts.total_volume);
+        // 详细调试信息
+        WTSLogger::debug("ParserZC parsed future tick: {} price={:.4f} volume={} oi={} time={} status={}",
+                         tick->code(), ts.price, ts.total_volume, ts.open_interest,
+                         ts.action_time, pFutureData->nStatus);
+
+        // 打印买卖盘信息用于调试
+        WTSLogger::debug("ParserZC Future bid/ask: bid1={:.4f}({}) ask1={:.4f}({})",
+                         ts.bid_prices[0], (uint64_t)ts.bid_qty[0],
+                         ts.ask_prices[0], (uint64_t)ts.ask_qty[0]);
+
         return tick;
     }
     catch (const std::exception &e)
@@ -1220,18 +1373,76 @@ WTSTickData *ParserZC::parseIndexData(T_SIPTAGMSG *pMsg, const std::string &inst
     // 解析指数数据 (消息类型1000, 2000, 7002)
     WTSLogger::debug("ParserZC parsing index data for {}", instrument);
 
+    if (pMsg == nullptr || pMsg->MsgData == nullptr)
+    {
+        WTSLogger::error("ParserZC parseIndexData: invalid message data");
+        return nullptr;
+    }
+
     // 创建WTSTickData对象
     WTSTickData *tick = WTSTickData::create(instrument.c_str());
     if (tick == nullptr)
         return nullptr;
 
-    // TODO: 根据ZhongChang接入规范实现具体的指数数据解析
+    try
+    {
+        // 将消息数据转换为指数结构
+        T_SH_StockIndex *pIndexData = (T_SH_StockIndex *)pMsg->MsgData;
+        WTSTickStruct &ts = tick->getTickStruct();
 
-    // 设置基本信息
-    tick->getTickStruct().trading_date = getTradingDate();
+        // 设置时间信息
+        ts.action_date = pIndexData->nActionDay;
+        ts.action_time = pIndexData->nTime;
+        ts.trading_date = getTradingDate();
 
-    WTSLogger::debug("ParserZC parsed index tick: {}", tick->code());
-    return tick;
+        // 设置价格信息，使用checkValid处理异常值
+        ts.price = checkValid(ZC_PRICE_TO_DOUBLE(pIndexData->nLastIndex));        // 最新指数
+        ts.open = checkValid(ZC_PRICE_TO_DOUBLE(pIndexData->nOpenIndex));         // 开盘指数
+        ts.high = checkValid(ZC_PRICE_TO_DOUBLE(pIndexData->nHighIndex));         // 最高指数
+        ts.low = checkValid(ZC_PRICE_TO_DOUBLE(pIndexData->nLowIndex));           // 最低指数
+        ts.pre_close = checkValid(ZC_PRICE_TO_DOUBLE(pIndexData->nPreCloseIndex)); // 昨收指数
+
+        // 指数没有涨跌停概念
+        ts.upper_limit = 0;
+        ts.lower_limit = 0;
+
+        // 设置成交量信息
+        ts.total_volume = (double)pIndexData->iTotalVolume;      // 总成交量
+        ts.volume = 0;                                           // 当前成交量
+        ts.total_turnover = (double)pIndexData->iTurnover / 10000.0; // 总成交额(分转元)
+        ts.turn_over = 0.0;                                      // 当前成交额
+
+        // 指数没有持仓概念
+        ts.open_interest = 0;
+        ts.diff_interest = 0;
+        ts.pre_interest = 0;
+        ts.settle_price = 0;
+        ts.pre_settle = 0;
+
+        // 指数没有买卖盘
+        for (int i = 0; i < 10; i++)
+        {
+            ts.bid_prices[i] = 0;
+            ts.ask_prices[i] = 0;
+            ts.bid_qty[i] = 0;
+            ts.ask_qty[i] = 0;
+        }
+
+        // 增加tick计数
+        m_uTickCount++;
+
+        // 详细调试信息
+        WTSLogger::debug("ParserZC parsed index tick: {} price={:.4f} volume={} time={}",
+                         tick->code(), ts.price, ts.total_volume, ts.action_time);
+
+        return tick;
+    }
+    catch (const std::exception &e)
+    {
+        WTSLogger::error("ParserZC parseIndexData exception: {}", e.what());
+        tick->release();
+        return nullptr;
+    }
 }
 
 WTSTickData *ParserZC::parseOptionData(T_SIPTAGMSG *pMsg, const std::string &instrument)
@@ -1291,25 +1502,7 @@ ZCTimeInfo ParserZC::convertZCTime(T_I32 action_day, T_I32 time_stamp)
     return timeInfo;
 }
 
-ZCPriceInfo ParserZC::convertZCPrice(T_U32 raw_price)
-{
-    ZCPriceInfo priceInfo;
 
-    // 检查价格是否有效
-    priceInfo.is_valid = ZC_IS_VALID_PRICE(raw_price);
-
-    if (priceInfo.is_valid)
-    {
-        // 转换价格：ZhongChang使用4位小数的整数表示价格
-        priceInfo.price = ZC_PRICE_TO_DOUBLE(raw_price);
-    }
-    else
-    {
-        priceInfo.price = 0.0;
-    }
-
-    return priceInfo;
-}
 
 void ParserZC::setTickBasicInfo(WTSTickData *tick, const ZCTimeInfo &time_info, const std::string &instrument)
 {

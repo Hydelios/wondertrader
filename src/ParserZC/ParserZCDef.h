@@ -153,19 +153,7 @@ struct ZCTimeInfo
     ZCTimeInfo() : action_date(0), action_time(0), trading_date(0) {}
 };
 
-// 价格数据验证结果
-struct ZCPriceInfo
-{
-    double price;
-    bool is_valid;
 
-    ZCPriceInfo() : price(0.0), is_valid(false) {}
-    ZCPriceInfo(T_U32 raw_price)
-    {
-        is_valid = ZC_IS_VALID_PRICE(raw_price);
-        price = is_valid ? ZC_PRICE_TO_DOUBLE(raw_price) : 0.0;
-    }
-};
 
 // 市场类型枚举
 enum ZCMarketType
